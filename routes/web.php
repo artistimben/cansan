@@ -27,9 +27,37 @@ Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard
 
 // Debug route
 Route::get('/debug/furnace-status', [App\Http\Controllers\DebugController::class, 'furnaceStatus'])->name('debug.furnace-status');
+Route::get('/debug/active-castings', [App\Http\Controllers\DebugController::class, 'activeCastings'])->name('debug.active-castings');
 
 // Force set rule
 Route::get('/force-set-rule', [App\Http\Controllers\ForceSetRuleController::class, 'enforceSetRule'])->name('force.set-rule');
+
+// API Routes
+Route::prefix('api')->group(function () {
+    Route::get('/furnaces/{furnace}/active-casting-check', [App\Http\Controllers\FurnaceController::class, 'checkActiveCasting'])->name('api.furnaces.active-casting-check');
+});
+
+// Ocak Yönetimi
+Route::prefix('furnace-management')->name('furnace-management.')->group(function () {
+    Route::get('/', [App\Http\Controllers\FurnaceManagementController::class, 'index'])->name('index');
+    Route::post('/{furnace}/change-refractory', [App\Http\Controllers\FurnaceManagementController::class, 'changeRefractory'])->name('change-refractory');
+    Route::post('/{furnace}/start-maintenance', [App\Http\Controllers\FurnaceManagementController::class, 'startMaintenance'])->name('start-maintenance');
+    Route::post('/{furnace}/end-maintenance', [App\Http\Controllers\FurnaceManagementController::class, 'endMaintenance'])->name('end-maintenance');
+    Route::post('/{furnace}/shutdown', [App\Http\Controllers\FurnaceManagementController::class, 'shutdown'])->name('shutdown');
+    Route::post('/{furnace}/end-shutdown', [App\Http\Controllers\FurnaceManagementController::class, 'endShutdown'])->name('end-shutdown');
+    Route::post('/{furnace}/reset-casting-count', [App\Http\Controllers\FurnaceManagementController::class, 'resetCastingCount'])->name('reset-casting-count');
+    Route::get('/{furnace}/status-history', [App\Http\Controllers\FurnaceManagementController::class, 'statusHistory'])->name('status-history');
+    Route::get('/{furnace}/statistics', [App\Http\Controllers\FurnaceManagementController::class, 'statistics'])->name('statistics');
+});
+
+// Ocak Raporları
+Route::prefix('furnace-reports')->name('furnace-reports.')->group(function () {
+    Route::get('/', [App\Http\Controllers\FurnaceReportController::class, 'index'])->name('index');
+    Route::get('/furnace/{furnace}', [App\Http\Controllers\FurnaceReportController::class, 'furnaceDetail'])->name('furnace-detail');
+    Route::get('/maintenance', [App\Http\Controllers\FurnaceReportController::class, 'maintenanceReport'])->name('maintenance');
+    Route::get('/shutdown', [App\Http\Controllers\FurnaceReportController::class, 'shutdownReport'])->name('shutdown');
+    Route::get('/samples', [App\Http\Controllers\FurnaceReportController::class, 'sampleReport'])->name('samples');
+});
 
 Route::get('/dashboard/realtime-status', [DashboardController::class, 'getRealtimeStatus'])->name('dashboard.realtime');
 Route::get('/dashboard/health-check', [DashboardController::class, 'healthCheck'])->name('dashboard.health');

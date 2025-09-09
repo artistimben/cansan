@@ -477,22 +477,30 @@ class FurnaceController extends Controller
             'current_temperature' => 'nullable|numeric|min:0|max:3000'
         ]);
         
-        $updateData = [
-            'status' => $validated['status'],
-            'status_updated_at' => now()
-        ];
+        // Set kuralına göre durum değiştir
+        $result = $furnace->changeStatusWithSetRule($validated['status']);
         
-        // Sıcaklık varsa ekle
+        if (!$result['success']) {
+            return response()->json([
+                'success' => false,
+                'message' => $result['message']
+            ], 400);
+        }
+        
+        // Sıcaklık güncelleme
         if (isset($validated['current_temperature'])) {
-            $updateData['current_temperature'] = $validated['current_temperature'];
+            $furnace->update([
+                'current_temperature' => $validated['current_temperature']
+            ]);
+            
+            // Sıcaklık geçmişine kaydet
+            $furnace->addTemperatureLog(
+                $validated['current_temperature'],
+                $validated['status'] === 'active' ? 'working' : 'shutdown',
+                $validated['status_notes'] ?? "Durum değişikliği: {$validated['status']}",
+                'Sistem'
+            );
         }
-        
-        // Aktif değilse sıcaklığı sıfırla
-        if ($validated['status'] === 'inactive') {
-            $updateData['current_temperature'] = 0;
-        }
-        
-        $furnace->update($updateData);
         
         $statusNames = [
             'active' => 'Aktif',
@@ -503,7 +511,8 @@ class FurnaceController extends Controller
         
         return response()->json([
             'success' => true,
-            'message' => $furnace->name . ' durumu "' . $statusNames[$validated['status']] . '" olarak güncellendi'
+            'message' => $result['message'],
+            'affected_furnaces' => $result['affected_furnaces']
         ]);
     }
     
@@ -588,6 +597,20 @@ class FurnaceController extends Controller
             'success' => true,
             'temperature_logs' => $temperatureLogs,
             'last_temperature' => $furnace->getLastRecordedTemperature()
+        ]);
+    }
+    
+    /**
+     * Ocakta aktif döküm var mı kontrol et
+     */
+    public function checkActiveCasting(Furnace $furnace)
+    {
+        $hasActiveCasting = Casting::hasActiveCastingInFurnace($furnace->id);
+        
+        return response()->json([
+            'has_active_casting' => $hasActiveCasting,
+            'furnace_name' => $furnace->name,
+            'furnace_set' => $furnace->furnaceSet->name
         ]);
     }
 }

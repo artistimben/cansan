@@ -29,7 +29,18 @@ class Furnace extends Model
         'installation_date',
         'last_maintenance_date',
         'maintenance_interval_days',
-        'status_updated_at'
+        'status_updated_at',
+        // Yeni alanlar
+        'total_castings_count',
+        'current_cycle_castings',
+        'last_refractory_change',
+        'castings_since_refractory',
+        'maintenance_notes',
+        'shutdown_reason',
+        'refractory_notes',
+        'operational_notes',
+        'last_count_reset',
+        'reset_type'
     ];
 
     protected $casts = [
@@ -41,7 +52,13 @@ class Furnace extends Model
         'installation_date' => 'date',
         'last_maintenance_date' => 'date',
         'maintenance_interval_days' => 'integer',
-        'status_updated_at' => 'datetime'
+        'status_updated_at' => 'datetime',
+        // Yeni alanlar
+        'total_castings_count' => 'integer',
+        'current_cycle_castings' => 'integer',
+        'last_refractory_change' => 'date',
+        'castings_since_refractory' => 'integer',
+        'last_count_reset' => 'datetime'
     ];
 
     /**
@@ -286,5 +303,149 @@ class Furnace extends Model
         }
 
         return $result;
+    }
+
+    /**
+     * Durum geçmişi ilişkisi
+     */
+    public function statusLogs(): HasMany
+    {
+        return $this->hasMany(FurnaceStatusLog::class);
+    }
+
+    /**
+     * Döküm sayacını artır
+     */
+    public function incrementCastingCount(): void
+    {
+        $this->increment('total_castings_count');
+        $this->increment('current_cycle_castings');
+        $this->increment('castings_since_refractory');
+    }
+
+    /**
+     * Döküm sayacını sıfırla
+     */
+    public function resetCastingCount(string $resetType = 'manual', ?string $notes = null): void
+    {
+        $this->update([
+            'current_cycle_castings' => 0,
+            'castings_since_refractory' => 0,
+            'last_count_reset' => now(),
+            'reset_type' => $resetType
+        ]);
+
+        // Durum logu oluştur
+        FurnaceStatusLog::logStatusChange(
+            $this->id,
+            $this->status,
+            null,
+            'Döküm sayacı sıfırlandı',
+            $notes,
+            null,
+            true,
+            $resetType
+        );
+    }
+
+    /**
+     * Refraktör değişimi
+     */
+    public function changeRefractory(?string $notes = null, ?string $operatorName = null): void
+    {
+        // Döküm sayacını sıfırla
+        $this->resetCastingCount('refractory_change', $notes);
+        
+        // Refraktör değişim tarihini güncelle
+        $this->update([
+            'last_refractory_change' => now()->toDateString(),
+            'refractory_notes' => $notes
+        ]);
+
+        // Durum logu oluştur
+        FurnaceStatusLog::logRefractoryChange($this->id, $notes, $operatorName);
+    }
+
+    /**
+     * Bakım durumu
+     */
+    public function startMaintenance(?string $reason = null, ?string $notes = null, ?string $operatorName = null, bool $resetCount = false): void
+    {
+        $this->update([
+            'status' => 'maintenance',
+            'status_updated_at' => now(),
+            'maintenance_notes' => $notes
+        ]);
+
+        if ($resetCount) {
+            $this->resetCastingCount('maintenance', $notes);
+        }
+
+        // Durum logu oluştur
+        FurnaceStatusLog::logMaintenance($this->id, $reason, $notes, $operatorName, $resetCount);
+    }
+
+    /**
+     * Duruş durumu
+     */
+    public function shutdown(?string $reason = null, ?string $notes = null, ?string $operatorName = null): void
+    {
+        $this->update([
+            'status' => 'shutdown',
+            'status_updated_at' => now(),
+            'shutdown_reason' => $reason,
+            'operational_notes' => $notes
+        ]);
+
+        // Durum logu oluştur
+        FurnaceStatusLog::logShutdown($this->id, $reason, $notes, $operatorName);
+    }
+
+    /**
+     * Döküm istatistikleri
+     */
+    public function getCastingStatistics(): array
+    {
+        return [
+            'total_castings' => $this->total_castings_count,
+            'current_cycle_castings' => $this->current_cycle_castings,
+            'castings_since_refractory' => $this->castings_since_refractory,
+            'last_refractory_change' => $this->last_refractory_change,
+            'last_count_reset' => $this->last_count_reset,
+            'reset_type' => $this->reset_type
+        ];
+    }
+
+    /**
+     * Bakım durumu kontrolü
+     */
+    public function needsMaintenance(): bool
+    {
+        if (!$this->last_maintenance_date || !$this->maintenance_interval_days) {
+            return false;
+        }
+
+        $daysSinceMaintenance = $this->last_maintenance_date->diffInDays(now());
+        return $daysSinceMaintenance >= $this->maintenance_interval_days;
+    }
+
+    /**
+     * Bakım ilerlemesi
+     */
+    public function getMaintenanceProgress(): array
+    {
+        if (!$this->last_maintenance_date || !$this->maintenance_interval_days) {
+            return ['progress' => 0, 'days_remaining' => 0, 'needs_maintenance' => false];
+        }
+
+        $daysSinceMaintenance = $this->last_maintenance_date->diffInDays(now());
+        $progress = min(100, ($daysSinceMaintenance / $this->maintenance_interval_days) * 100);
+        $daysRemaining = max(0, $this->maintenance_interval_days - $daysSinceMaintenance);
+
+        return [
+            'progress' => round($progress, 1),
+            'days_remaining' => $daysRemaining,
+            'needs_maintenance' => $daysRemaining <= 0
+        ];
     }
 }

@@ -173,8 +173,9 @@ class SampleController extends Controller
     public function edit(Sample $sample)
     {
         $sample->load('casting.furnace.furnaceSet');
+        $qualityStandards = QualityStandard::all();
         
-        return view('samples.edit', compact('sample'));
+        return view('samples.edit', compact('sample', 'qualityStandards'));
     }
     
     /**

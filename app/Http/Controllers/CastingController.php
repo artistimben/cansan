@@ -69,6 +69,19 @@ class CastingController extends Controller
         $selectedFurnace = null;
         if ($request->filled('furnace_id')) {
             $selectedFurnace = Furnace::find($request->furnace_id);
+            
+            // Seçilen ocakta aktif döküm var mı kontrol et
+            if ($selectedFurnace && Casting::hasActiveCastingInFurnace($selectedFurnace->id)) {
+                return redirect()->back()->with('error', "Bu ocakta zaten aktif bir döküm bulunuyor. Önce mevcut dökümü tamamlayın.");
+            }
+        }
+        
+        // Tüm ocakların aktif döküm durumunu kontrol et
+        $furnacesWithActiveCastings = [];
+        foreach ($activeFurnaces as $furnace) {
+            if (Casting::hasActiveCastingInFurnace($furnace->id)) {
+                $furnacesWithActiveCastings[] = $furnace->name;
+            }
         }
         
         // Bugünkü istatistikler
@@ -82,7 +95,7 @@ class CastingController extends Controller
             'active_furnaces' => Furnace::where('status', 'active')->count()
         ];
         
-        return view('castings.create', compact('activeFurnaces', 'selectedFurnace', 'todayStats'));
+        return view('castings.create', compact('activeFurnaces', 'selectedFurnace', 'todayStats', 'furnacesWithActiveCastings'));
     }
     
     /**
@@ -103,6 +116,13 @@ class CastingController extends Controller
         
         // Furnace bilgisini al
         $furnace = Furnace::findOrFail($validated['furnace_id']);
+        
+        // Aktif döküm kontrolü - Aynı ocakta aktif döküm var mı?
+        if (Casting::hasActiveCastingInFurnace($furnace->id)) {
+            return back()
+                ->withErrors(['furnace_id' => 'Bu ocakta zaten aktif bir döküm bulunuyor. Önce mevcut dökümü tamamlayın.'])
+                ->withInput();
+        }
         
         // Eğer döküm numarası otomatik oluşturulacaksa
         if (empty($validated['casting_number']) || strpos($validated['casting_number'], 'HATA') !== false) {

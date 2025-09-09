@@ -256,4 +256,19 @@ class Casting extends Model
 
         return true;
     }
+
+    /**
+     * Döküm başlatıldığında çağrılır
+     */
+    protected static function boot()
+    {
+        parent::boot();
+
+        // Döküm oluşturulduğunda sayacı artır
+        static::created(function ($casting) {
+            if ($casting->status === 'active') {
+                $casting->furnace->incrementCastingCount();
+            }
+        });
+    }
 }

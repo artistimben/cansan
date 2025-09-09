@@ -393,9 +393,15 @@ document.getElementById('statusUpdateForm').addEventListener('submit', function(
     .then(data => {
         if (data.success) {
             showToast(data.message, 'success');
+            
+            // Etkilenen ocakları göster
+            if (data.affected_furnaces && data.affected_furnaces.length > 0) {
+                showToast(`Etkilenen ocaklar: ${data.affected_furnaces.join(', ')}`, 'info');
+            }
+            
             location.reload();
         } else {
-            showToast('Hata oluştu', 'error');
+            showToast(data.message || 'Hata oluştu', 'error');
         }
     })
     .catch(error => {

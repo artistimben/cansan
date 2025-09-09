@@ -1,6 +1,6 @@
-@extends('layouts.app')
 
-@section('content')
+
+<?php $__env->startSection('content'); ?>
 <div class="container-fluid">
     <!-- Başlık -->
     <div class="row">
@@ -14,7 +14,7 @@
                     <p class="text-muted mb-0">Ocaktan yeni döküm başlatın ve takip edin</p>
                 </div>
                 <div>
-                    <a href="{{ route('castings.index') }}" class="btn btn-outline-secondary">
+                    <a href="<?php echo e(route('castings.index')); ?>" class="btn btn-outline-secondary">
                         <i class="fas fa-arrow-left"></i> Geri Dön
                     </a>
                 </div>
@@ -23,7 +23,7 @@
     </div>
 
     <!-- Aktif Döküm Uyarısı -->
-    @if(!empty($furnacesWithActiveCastings))
+    <?php if(!empty($furnacesWithActiveCastings)): ?>
         <div class="row mb-4">
             <div class="col-12">
                 <div class="alert alert-warning d-flex align-items-center" role="alert">
@@ -31,15 +31,15 @@
                     <div>
                         <strong>Dikkat!</strong> Aşağıdaki ocaklarda zaten aktif döküm bulunuyor:
                         <ul class="mb-0 mt-2">
-                            @foreach($furnacesWithActiveCastings as $furnaceName)
-                                <li><strong>{{ $furnaceName }}</strong> - Önce mevcut dökümü tamamlayın</li>
-                            @endforeach
+                            <?php $__currentLoopData = $furnacesWithActiveCastings; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $furnaceName): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <li><strong><?php echo e($furnaceName); ?></strong> - Önce mevcut dökümü tamamlayın</li>
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                         </ul>
                     </div>
                 </div>
             </div>
         </div>
-    @endif
+    <?php endif; ?>
 
     <div class="row">
         <!-- Sol Kolon - Form -->
@@ -51,8 +51,8 @@
                     </h5>
                 </div>
                 <div class="card-body">
-                    <form action="{{ route('castings.store') }}" method="POST" id="castingForm">
-                        @csrf
+                    <form action="<?php echo e(route('castings.store')); ?>" method="POST" id="castingForm">
+                        <?php echo csrf_field(); ?>
                         
                         <!-- Ocak Seçimi -->
                         <div class="row mb-4">
@@ -60,25 +60,41 @@
                                 <label for="furnace_id" class="form-label">
                                     <i class="fas fa-fire text-primary"></i> Ocak Seçimi *
                                 </label>
-                                <select name="furnace_id" id="furnace_id" class="form-select @error('furnace_id') is-invalid @enderror" required>
+                                <select name="furnace_id" id="furnace_id" class="form-select <?php $__errorArgs = ['furnace_id'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" required>
                                     <option value="">Ocak seçiniz...</option>
-                                    @foreach($activeFurnaces as $furnace)
-                                        <option value="{{ $furnace->id }}" 
-                                            {{ (old('furnace_id', $selectedFurnace?->id) == $furnace->id) ? 'selected' : '' }}
-                                            data-set-name="{{ $furnace->furnaceSet->name }}"
-                                            data-furnace-name="{{ $furnace->name }}"
-                                            data-current-temp="{{ $furnace->current_temperature }}"
-                                            data-max-temp="{{ $furnace->max_temperature }}">
-                                            {{ $furnace->furnaceSet->name }} - {{ $furnace->name }}
-                                            @if($furnace->current_temperature)
-                                                ({{ $furnace->current_temperature }}°C)
-                                            @endif
+                                    <?php $__currentLoopData = $activeFurnaces; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $furnace): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                        <option value="<?php echo e($furnace->id); ?>" 
+                                            <?php echo e((old('furnace_id', $selectedFurnace?->id) == $furnace->id) ? 'selected' : ''); ?>
+
+                                            data-set-name="<?php echo e($furnace->furnaceSet->name); ?>"
+                                            data-furnace-name="<?php echo e($furnace->name); ?>"
+                                            data-current-temp="<?php echo e($furnace->current_temperature); ?>"
+                                            data-max-temp="<?php echo e($furnace->max_temperature); ?>">
+                                            <?php echo e($furnace->furnaceSet->name); ?> - <?php echo e($furnace->name); ?>
+
+                                            <?php if($furnace->current_temperature): ?>
+                                                (<?php echo e($furnace->current_temperature); ?>°C)
+                                            <?php endif; ?>
                                         </option>
-                                    @endforeach
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                 </select>
-                                @error('furnace_id')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
+                                <?php $__errorArgs = ['furnace_id'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                    <div class="invalid-feedback"><?php echo e($message); ?></div>
+                                <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                             </div>
                             <div class="col-md-6">
                                 <label for="casting_number" class="form-label">
@@ -91,14 +107,28 @@
                                     <input type="text" 
                                            name="casting_number" 
                                            id="casting_number" 
-                                           class="form-control @error('casting_number') is-invalid @enderror" 
-                                           value="{{ old('casting_number') }}" 
+                                           class="form-control <?php $__errorArgs = ['casting_number'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" 
+                                           value="<?php echo e(old('casting_number')); ?>" 
                                            readonly
                                            placeholder="Ocak seçildikten sonra otomatik oluşturulur">
                                 </div>
-                                @error('casting_number')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
+                                <?php $__errorArgs = ['casting_number'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                    <div class="invalid-feedback"><?php echo e($message); ?></div>
+                                <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                                 <small class="form-text text-muted">
                                     <i class="fas fa-info-circle"></i> 
                                     Döküm numarası otomatik olarak oluşturulur (Örn: 3.OCAK-27.DÖKÜM)
@@ -115,12 +145,26 @@
                                 <input type="date" 
                                        name="casting_date" 
                                        id="casting_date" 
-                                       class="form-control @error('casting_date') is-invalid @enderror" 
-                                       value="{{ old('casting_date', date('Y-m-d')) }}" 
+                                       class="form-control <?php $__errorArgs = ['casting_date'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" 
+                                       value="<?php echo e(old('casting_date', date('Y-m-d'))); ?>" 
                                        required>
-                                @error('casting_date')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
+                                <?php $__errorArgs = ['casting_date'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                    <div class="invalid-feedback"><?php echo e($message); ?></div>
+                                <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                             </div>
                             <div class="col-md-4">
                                 <label for="casting_time" class="form-label">
@@ -129,29 +173,57 @@
                                 <input type="time" 
                                        name="casting_time" 
                                        id="casting_time" 
-                                       class="form-control @error('casting_time') is-invalid @enderror" 
-                                       value="{{ old('casting_time', date('H:i')) }}" 
+                                       class="form-control <?php $__errorArgs = ['casting_time'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" 
+                                       value="<?php echo e(old('casting_time', date('H:i'))); ?>" 
                                        required>
-                                @error('casting_time')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
+                                <?php $__errorArgs = ['casting_time'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                    <div class="invalid-feedback"><?php echo e($message); ?></div>
+                                <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                             </div>
                             <div class="col-md-4">
                                 <label for="shift" class="form-label">
                                     <i class="fas fa-user-clock text-info"></i> Vardiya *
                                 </label>
-                                <select name="shift" id="shift" class="form-select @error('shift') is-invalid @enderror" required>
+                                <select name="shift" id="shift" class="form-select <?php $__errorArgs = ['shift'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" required>
                                     <option value="">Vardiya seçiniz...</option>
-                                    <option value="Gündüz" {{ old('shift') === 'Gündüz' ? 'selected' : '' }}>
+                                    <option value="Gündüz" <?php echo e(old('shift') === 'Gündüz' ? 'selected' : ''); ?>>
                                         🌞 Gündüz (06:00-18:00)
                                     </option>
-                                    <option value="Gece" {{ old('shift') === 'Gece' ? 'selected' : '' }}>
+                                    <option value="Gece" <?php echo e(old('shift') === 'Gece' ? 'selected' : ''); ?>>
                                         🌙 Gece (18:00-06:00)
                                     </option>
                                 </select>
-                                @error('shift')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
+                                <?php $__errorArgs = ['shift'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                    <div class="invalid-feedback"><?php echo e($message); ?></div>
+                                <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                             </div>
                         </div>
 
@@ -164,13 +236,27 @@
                                 <input type="text" 
                                        name="operator_name" 
                                        id="operator_name" 
-                                       class="form-control @error('operator_name') is-invalid @enderror" 
-                                       value="{{ old('operator_name') }}" 
+                                       class="form-control <?php $__errorArgs = ['operator_name'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" 
+                                       value="<?php echo e(old('operator_name')); ?>" 
                                        placeholder="Operatör adı ve soyadı"
                                        required>
-                                @error('operator_name')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
+                                <?php $__errorArgs = ['operator_name'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                    <div class="invalid-feedback"><?php echo e($message); ?></div>
+                                <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                             </div>
                             <div class="col-md-6">
                                 <label for="target_temperature" class="form-label">
@@ -180,16 +266,30 @@
                                     <input type="number" 
                                            name="target_temperature" 
                                            id="target_temperature" 
-                                           class="form-control @error('target_temperature') is-invalid @enderror" 
-                                           value="{{ old('target_temperature') }}" 
+                                           class="form-control <?php $__errorArgs = ['target_temperature'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" 
+                                           value="<?php echo e(old('target_temperature')); ?>" 
                                            min="0" 
                                            max="3000" 
                                            placeholder="1650">
                                     <span class="input-group-text">°C</span>
                                 </div>
-                                @error('target_temperature')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
+                                <?php $__errorArgs = ['target_temperature'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                    <div class="invalid-feedback"><?php echo e($message); ?></div>
+                                <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                                 <small class="form-text text-muted">
                                     <span id="temp-range-info">Maksimum sıcaklık bilgisi için ocak seçiniz</span>
                                 </small>
@@ -203,17 +303,31 @@
                             </label>
                             <textarea name="notes" 
                                       id="notes" 
-                                      class="form-control @error('notes') is-invalid @enderror" 
+                                      class="form-control <?php $__errorArgs = ['notes'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" 
                                       rows="3" 
-                                      placeholder="Döküm ile ilgili özel notlar, dikkat edilecek hususlar...">{{ old('notes') }}</textarea>
-                            @error('notes')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
+                                      placeholder="Döküm ile ilgili özel notlar, dikkat edilecek hususlar..."><?php echo e(old('notes')); ?></textarea>
+                            <?php $__errorArgs = ['notes'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                <div class="invalid-feedback"><?php echo e($message); ?></div>
+                            <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                         </div>
 
                         <!-- Submit Buttons -->
                         <div class="d-flex justify-content-between">
-                            <a href="{{ route('castings.index') }}" class="btn btn-outline-secondary">
+                            <a href="<?php echo e(route('castings.index')); ?>" class="btn btn-outline-secondary">
                                 <i class="fas fa-times"></i> İptal
                             </a>
                             <button type="submit" class="btn btn-primary btn-lg">
@@ -252,12 +366,12 @@
                     <div class="row text-center">
                         <div class="col-6">
                             <div class="border-end">
-                                <h4 class="text-primary mb-1">{{ $todayStats['total_castings'] ?? 0 }}</h4>
+                                <h4 class="text-primary mb-1"><?php echo e($todayStats['total_castings'] ?? 0); ?></h4>
                                 <small class="text-muted">Toplam Döküm</small>
                             </div>
                         </div>
                         <div class="col-6">
-                            <h4 class="text-success mb-1">{{ $todayStats['active_castings'] ?? 0 }}</h4>
+                            <h4 class="text-success mb-1"><?php echo e($todayStats['active_castings'] ?? 0); ?></h4>
                             <small class="text-muted">Aktif Döküm</small>
                         </div>
                     </div>
@@ -265,12 +379,12 @@
                     <div class="row text-center">
                         <div class="col-6">
                             <div class="border-end">
-                                <h4 class="text-warning mb-1">{{ $todayStats['total_samples'] ?? 0 }}</h4>
+                                <h4 class="text-warning mb-1"><?php echo e($todayStats['total_samples'] ?? 0); ?></h4>
                                 <small class="text-muted">Toplam Prova</small>
                             </div>
                         </div>
                         <div class="col-6">
-                            <h4 class="text-info mb-1">{{ $todayStats['active_furnaces'] ?? 0 }}</h4>
+                            <h4 class="text-info mb-1"><?php echo e($todayStats['active_furnaces'] ?? 0); ?></h4>
                             <small class="text-muted">Aktif Ocak</small>
                         </div>
                     </div>
@@ -307,9 +421,9 @@
         </div>
     </div>
 </div>
-@endsection
+<?php $__env->stopSection(); ?>
 
-@push('scripts')
+<?php $__env->startPush('scripts'); ?>
 <script>
 $(document).ready(function() {
     // Ocak seçimi değiştiğinde
@@ -431,4 +545,6 @@ $('#castingForm').on('submit', function(e) {
     }
 });
 </script>
-@endpush
+<?php $__env->stopPush(); ?>
+
+<?php echo $__env->make('layouts.app', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH C:\xampp\htdocs\cansan\kk-cansan\resources\views/castings/create.blade.php ENDPATH**/ ?>

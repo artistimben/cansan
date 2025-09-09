@@ -315,6 +315,18 @@
                                 Yeni Prova
                             </a>
                         </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="<?php echo e(route('furnace-management.index')); ?>">
+                                <i class="fas fa-cogs me-2"></i>
+                                Ocak Yönetimi
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="<?php echo e(route('furnace-reports.index')); ?>">
+                                <i class="fas fa-chart-line me-2"></i>
+                                Ocak Raporları
+                            </a>
+                        </li>
                     </ul>
                 </div>
             </nav>
