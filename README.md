@@ -1,3 +1,4 @@
+#RESPOJSİVE
 # Cansan Çelik Üretim Fabrikası Kalite Kontrol Sistemi
 
 Bu sistem, Cansan Çelik Üretim Fabrikası'nın kalite kontrol biriminde kullanılmak üzere geliştirilmiştir. Ocaktan alınan provaların ölçümlerini düzenli bir şekilde kayıt eder ve günlük, haftalık, aylık otomatik raporlar sunar.
