@@ -5,7 +5,7 @@
 <?php $__env->startSection('header', 'Raporlama Sistemi'); ?>
 
 <?php $__env->startSection('header-buttons'); ?>
-    <div class="btn-group" role="group">
+    <div class="btn-group d-none d-md-flex" role="group">
         <button type="button" class="btn btn-outline-primary btn-sm" onclick="refreshReports()">
             <i class="fas fa-sync-alt me-1"></i>
             Yenile
@@ -22,58 +22,87 @@
             </ul>
         </div>
     </div>
+    
+    <!-- Mobile buttons -->
+    <div class="d-flex d-md-none gap-2">
+        <button type="button" class="btn btn-outline-primary btn-sm" onclick="refreshReports()">
+            <i class="fas fa-sync-alt"></i>
+        </button>
+        <div class="btn-group" role="group">
+            <button type="button" class="btn btn-outline-success btn-sm dropdown-toggle" data-bs-toggle="dropdown">
+                <i class="fas fa-download"></i>
+            </button>
+            <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="#" onclick="exportReport('daily')">Günlük</a></li>
+                <li><a class="dropdown-item" href="#" onclick="exportReport('weekly')">Haftalık</a></li>
+                <li><a class="dropdown-item" href="#" onclick="exportReport('monthly')">Aylık</a></li>
+            </ul>
+        </div>
+    </div>
 <?php $__env->stopSection(); ?>
 
 <?php $__env->startSection('content'); ?>
 <!-- Rapor Türleri -->
 <div class="row mb-4">
-    <div class="col-md-4 mb-3">
+    <div class="col-12 col-md-4 mb-3">
         <div class="card h-100">
             <div class="card-body text-center">
                 <i class="fas fa-calendar-day fa-3x text-primary mb-3"></i>
                 <h5 class="card-title">Günlük Rapor</h5>
-                <p class="card-text">Bugünkü döküm, prova ve kalite istatistikleri. Ocak bazında detaylı analiz.</p>
-                <a href="<?php echo e(route('reports.daily')); ?>" class="btn btn-primary">
-                    <i class="fas fa-eye me-1"></i>
-                    Görüntüle
-                </a>
-                <button class="btn btn-outline-primary ms-2" onclick="exportReport('daily')">
-                    <i class="fas fa-download"></i>
-                </button>
+                <p class="card-text d-none d-sm-block">Bugünkü döküm, prova ve kalite istatistikleri. Ocak bazında detaylı analiz.</p>
+                <p class="card-text d-block d-sm-none">Günlük döküm ve prova istatistikleri</p>
+                <div class="d-flex flex-column flex-sm-row gap-2 justify-content-center">
+                    <a href="<?php echo e(route('reports.daily')); ?>" class="btn btn-primary">
+                        <i class="fas fa-eye me-1"></i>
+                        <span class="d-none d-sm-inline">Görüntüle</span>
+                        <span class="d-inline d-sm-none">Gör</span>
+                    </a>
+                    <button class="btn btn-outline-primary" onclick="exportReport('daily')">
+                        <i class="fas fa-download"></i>
+                    </button>
+                </div>
             </div>
         </div>
     </div>
     
-    <div class="col-md-4 mb-3">
+    <div class="col-12 col-md-4 mb-3">
         <div class="card h-100">
             <div class="card-body text-center">
                 <i class="fas fa-calendar-week fa-3x text-success mb-3"></i>
                 <h5 class="card-title">Haftalık Rapor</h5>
-                <p class="card-text">Son 7 günün trend analizi. Ocak performans karşılaştırması ve kalite oranları.</p>
-                <a href="<?php echo e(route('reports.weekly')); ?>" class="btn btn-success">
-                    <i class="fas fa-eye me-1"></i>
-                    Görüntüle
-                </a>
-                <button class="btn btn-outline-success ms-2" onclick="exportReport('weekly')">
-                    <i class="fas fa-download"></i>
-                </button>
+                <p class="card-text d-none d-sm-block">Son 7 günün trend analizi. Ocak performans karşılaştırması ve kalite oranları.</p>
+                <p class="card-text d-block d-sm-none">Haftalık trend analizi</p>
+                <div class="d-flex flex-column flex-sm-row gap-2 justify-content-center">
+                    <a href="<?php echo e(route('reports.weekly')); ?>" class="btn btn-success">
+                        <i class="fas fa-eye me-1"></i>
+                        <span class="d-none d-sm-inline">Görüntüle</span>
+                        <span class="d-inline d-sm-none">Gör</span>
+                    </a>
+                    <button class="btn btn-outline-success" onclick="exportReport('weekly')">
+                        <i class="fas fa-download"></i>
+                    </button>
+                </div>
             </div>
         </div>
     </div>
     
-    <div class="col-md-4 mb-3">
+    <div class="col-12 col-md-4 mb-3">
         <div class="card h-100">
             <div class="card-body text-center">
                 <i class="fas fa-calendar-alt fa-3x text-info mb-3"></i>
                 <h5 class="card-title">Aylık Rapor</h5>
-                <p class="card-text">Aylık performans özeti. Ham madde tüketimi, vardiya analizi ve genel trend.</p>
-                <a href="<?php echo e(route('reports.monthly')); ?>" class="btn btn-info">
-                    <i class="fas fa-eye me-1"></i>
-                    Görüntüle
-                </a>
-                <button class="btn btn-outline-info ms-2" onclick="exportReport('monthly')">
-                    <i class="fas fa-download"></i>
-                </button>
+                <p class="card-text d-none d-sm-block">Aylık performans özeti. Ham madde tüketimi, vardiya analizi ve genel trend.</p>
+                <p class="card-text d-block d-sm-none">Aylık performans özeti</p>
+                <div class="d-flex flex-column flex-sm-row gap-2 justify-content-center">
+                    <a href="<?php echo e(route('reports.monthly')); ?>" class="btn btn-info">
+                        <i class="fas fa-eye me-1"></i>
+                        <span class="d-none d-sm-inline">Görüntüle</span>
+                        <span class="d-inline d-sm-none">Gör</span>
+                    </a>
+                    <button class="btn btn-outline-info" onclick="exportReport('monthly')">
+                        <i class="fas fa-download"></i>
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -91,32 +120,36 @@
             </div>
             <div class="card-body">
                 <div class="row text-center">
-                    <div class="col-md-3 mb-3">
+                    <div class="col-6 col-md-3 mb-3">
                         <div class="border rounded p-3">
                             <i class="fas fa-fire text-primary fa-2x mb-2"></i>
                             <h4 class="text-primary" id="today-castings">-</h4>
-                            <small class="text-muted">Bugünkü Döküm</small>
+                            <small class="text-muted d-none d-sm-block">Bugünkü Döküm</small>
+                            <small class="text-muted d-block d-sm-none">Döküm</small>
                         </div>
                     </div>
-                    <div class="col-md-3 mb-3">
+                    <div class="col-6 col-md-3 mb-3">
                         <div class="border rounded p-3">
                             <i class="fas fa-vial text-success fa-2x mb-2"></i>
                             <h4 class="text-success" id="today-samples">-</h4>
-                            <small class="text-muted">Bugünkü Prova</small>
+                            <small class="text-muted d-none d-sm-block">Bugünkü Prova</small>
+                            <small class="text-muted d-block d-sm-none">Prova</small>
                         </div>
                     </div>
-                    <div class="col-md-3 mb-3">
+                    <div class="col-6 col-md-3 mb-3">
                         <div class="border rounded p-3">
                             <i class="fas fa-check-circle text-info fa-2x mb-2"></i>
                             <h4 class="text-info" id="quality-rate">-%</h4>
-                            <small class="text-muted">Kalite Oranı</small>
+                            <small class="text-muted d-none d-sm-block">Kalite Oranı</small>
+                            <small class="text-muted d-block d-sm-none">Kalite</small>
                         </div>
                     </div>
-                    <div class="col-md-3 mb-3">
+                    <div class="col-6 col-md-3 mb-3">
                         <div class="border rounded p-3">
                             <i class="fas fa-tools text-warning fa-2x mb-2"></i>
                             <h4 class="text-warning" id="today-adjustments">-</h4>
-                            <small class="text-muted">Ham Madde Ekleme</small>
+                            <small class="text-muted d-none d-sm-block">Ham Madde Ekleme</small>
+                            <small class="text-muted d-block d-sm-none">Ham Madde</small>
                         </div>
                     </div>
                 </div>
@@ -289,4 +322,4 @@ document.addEventListener('keydown', function(e) {
 </script>
 <?php $__env->stopPush(); ?>
 
-<?php echo $__env->make('layouts.app', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH C:\xampp\htdocs\cansan\kk-cansan\resources\views/reports/index.blade.php ENDPATH**/ ?>
+<?php echo $__env->make('layouts.app', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH C:\xampp\htdocs\cansan\resources\views/reports/index.blade.php ENDPATH**/ ?>

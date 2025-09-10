@@ -1,23 +1,41 @@
 @extends('layouts.app')
 
+@section('title', 'Ocak Yönetimi - Cansan Kalite Kontrol')
+
+@section('header', 'Ocak Yönetimi')
+
+@section('header-buttons')
+    <div class="btn-group d-none d-md-flex" role="group">
+        <a href="{{ route('furnaces.index') }}" class="btn btn-outline-secondary btn-sm">
+            <i class="fas fa-arrow-left me-1"></i>
+            Ocaklara Dön
+        </a>
+        <button type="button" class="btn btn-outline-primary btn-sm" onclick="refreshFurnaces()">
+            <i class="fas fa-sync-alt me-1"></i>
+            Yenile
+        </button>
+    </div>
+    
+    <!-- Mobile buttons -->
+    <div class="d-flex d-md-none gap-2">
+        <a href="{{ route('furnaces.index') }}" class="btn btn-outline-secondary btn-sm">
+            <i class="fas fa-arrow-left"></i>
+        </a>
+        <button type="button" class="btn btn-outline-primary btn-sm" onclick="refreshFurnaces()">
+            <i class="fas fa-sync-alt"></i>
+        </button>
+    </div>
+@endsection
+
 @section('content')
 <div class="container-fluid">
-    <!-- Başlık -->
-    <div class="row">
+    <!-- Description -->
+    <div class="row mb-4">
         <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <div>
-                    <h1 class="h3 mb-0">
-                        <i class="fas fa-cogs text-primary"></i>
-                        Ocak Yönetimi
-                    </h1>
-                    <p class="text-muted mb-0">Refraktör değişimi, bakım ve duruş işlemleri</p>
-                </div>
-                <div>
-                    <a href="{{ route('furnaces.index') }}" class="btn btn-outline-secondary">
-                        <i class="fas fa-arrow-left"></i> Ocaklara Dön
-                    </a>
-                </div>
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i>
+                <span class="d-none d-sm-inline">Refraktör değişimi, bakım ve duruş işlemleri</span>
+                <span class="d-inline d-sm-none">Ocak işlemleri</span>
             </div>
         </div>
     </div>
@@ -25,12 +43,13 @@
     <!-- Ocaklar -->
     <div class="row">
         @foreach($furnaces as $furnace)
-        <div class="col-lg-6 col-xl-4 mb-4">
+        <div class="col-12 col-md-6 col-lg-4 mb-4">
             <div class="card h-100">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="mb-0">
                         <i class="fas fa-fire text-primary"></i>
-                        {{ $furnace->furnaceSet->name }} - {{ $furnace->name }}
+                        <span class="d-none d-sm-inline">{{ $furnace->furnaceSet->name }} - {{ $furnace->name }}</span>
+                        <span class="d-inline d-sm-none">{{ $furnace->name }}</span>
                     </h5>
                     <span class="badge bg-{{ $furnace->status === 'active' ? 'success' : ($furnace->status === 'maintenance' ? 'warning' : 'secondary') }}">
                         {{ ucfirst($furnace->status) }}
@@ -104,35 +123,66 @@
                         @if($furnace->status === 'maintenance')
                             <div class="col-12">
                                 <button class="btn btn-success btn-sm w-100" onclick="showEndMaintenanceModal({{ $furnace->id }}, '{{ $furnace->name }}')">
-                                    <i class="fas fa-check"></i> Bakımı Bitir
+                                    <i class="fas fa-check"></i> 
+                                    <span class="d-none d-sm-inline">Bakımı Bitir</span>
+                                    <span class="d-inline d-sm-none">Bitir</span>
                                 </button>
                             </div>
                         @elseif($furnace->status === 'shutdown')
                             <div class="col-12">
                                 <button class="btn btn-success btn-sm w-100" onclick="showEndShutdownModal({{ $furnace->id }}, '{{ $furnace->name }}')">
-                                    <i class="fas fa-play"></i> Devreye Al
+                                    <i class="fas fa-play"></i> 
+                                    <span class="d-none d-sm-inline">Devreye Al</span>
+                                    <span class="d-inline d-sm-none">Başlat</span>
                                 </button>
                             </div>
                         @else
-                            <div class="col-6">
-                                <button class="btn btn-warning btn-sm w-100" onclick="showRefractoryModal({{ $furnace->id }}, '{{ $furnace->name }}')">
-                                    <i class="fas fa-fire-extinguisher"></i> Refraktör
-                                </button>
+                            <!-- Mobile buttons (stacked) -->
+                            <div class="d-block d-sm-none">
+                                <div class="d-grid gap-2">
+                                    <button class="btn btn-warning btn-sm" onclick="showRefractoryModal({{ $furnace->id }}, '{{ $furnace->name }}')">
+                                        <i class="fas fa-fire-extinguisher me-1"></i>Refraktör Değişimi
+                                    </button>
+                                    <button class="btn btn-info btn-sm" onclick="showMaintenanceModal({{ $furnace->id }}, '{{ $furnace->name }}')">
+                                        <i class="fas fa-tools me-1"></i>Bakım Başlat
+                                    </button>
+                                    <button class="btn btn-danger btn-sm" onclick="showShutdownModal({{ $furnace->id }}, '{{ $furnace->name }}')">
+                                        <i class="fas fa-power-off me-1"></i>Duruş Başlat
+                                    </button>
+                                    <button class="btn btn-secondary btn-sm" onclick="showResetModal({{ $furnace->id }}, '{{ $furnace->name }}')">
+                                        <i class="fas fa-redo me-1"></i>Sayaç Sıfırla
+                                    </button>
+                                </div>
                             </div>
-                            <div class="col-6">
-                                <button class="btn btn-info btn-sm w-100" onclick="showMaintenanceModal({{ $furnace->id }}, '{{ $furnace->name }}')">
-                                    <i class="fas fa-tools"></i> Bakım
-                                </button>
-                            </div>
-                            <div class="col-6">
-                                <button class="btn btn-danger btn-sm w-100" onclick="showShutdownModal({{ $furnace->id }}, '{{ $furnace->name }}')">
-                                    <i class="fas fa-power-off"></i> Duruş
-                                </button>
-                            </div>
-                            <div class="col-6">
-                                <button class="btn btn-secondary btn-sm w-100" onclick="showResetModal({{ $furnace->id }}, '{{ $furnace->name }}')">
-                                    <i class="fas fa-redo"></i> Sıfırla
-                                </button>
+                            
+                            <!-- Desktop buttons (grid) -->
+                            <div class="d-none d-sm-block">
+                                <div class="row g-2">
+                                    <div class="col-3">
+                                        <button class="btn btn-warning btn-sm w-100" onclick="showRefractoryModal({{ $furnace->id }}, '{{ $furnace->name }}')" title="Refraktör Değişimi">
+                                            <i class="fas fa-fire-extinguisher"></i> 
+                                            <span class="d-none d-md-inline">Refraktör</span>
+                                        </button>
+                                    </div>
+                                    <div class="col-3">
+                                        <button class="btn btn-info btn-sm w-100" onclick="showMaintenanceModal({{ $furnace->id }}, '{{ $furnace->name }}')" title="Bakım Başlat">
+                                            <i class="fas fa-tools"></i> 
+                                            <span class="d-none d-md-inline">Bakım</span>
+                                        </button>
+                                    </div>
+                                    <div class="col-3">
+                                        <button class="btn btn-danger btn-sm w-100" onclick="showShutdownModal({{ $furnace->id }}, '{{ $furnace->name }}')" title="Duruş Başlat">
+                                            <i class="fas fa-power-off"></i> 
+                                            <span class="d-none d-md-inline">Duruş</span>
+                                        </button>
+                                    </div>
+                                    <div class="col-3">
+                                        <button class="btn btn-secondary btn-sm w-100" onclick="showResetModal({{ $furnace->id }}, '{{ $furnace->name }}')" title="Döküm Sayacını Sıfırla">
+                                            <i class="fas fa-redo"></i> 
+                                            <span class="d-none d-md-inline">Sıfırla</span>
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
                         @endif
                     </div>
@@ -498,6 +548,11 @@ function submitForm(url, formData) {
 function showToast(message, type) {
     // Toast gösterimi (mevcut toast sisteminizi kullanın)
     console.log(type.toUpperCase() + ':', message);
+}
+
+// Furnace management refresh
+function refreshFurnaces() {
+    location.reload();
 }
 </script>
 @endpush

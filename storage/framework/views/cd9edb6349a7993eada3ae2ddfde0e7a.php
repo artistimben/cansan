@@ -24,42 +24,46 @@
 <?php $__env->startSection('content'); ?>
 <!-- Hızlı İstatistikler -->
 <div class="row mb-4">
-    <div class="col-md-3 mb-3">
-        <div class="card text-center">
-            <div class="card-body">
+    <div class="col-6 col-md-3 mb-3">
+        <div class="card text-center h-100">
+            <div class="card-body d-flex flex-column justify-content-center">
                 <i class="fas fa-fire text-danger fa-2x mb-2"></i>
                 <h4 class="text-danger mb-1"><?php echo e($furnaces->where('status', 'active')->count()); ?></h4>
-                <small class="text-muted">Aktif Ocak</small>
+                <small class="text-muted d-none d-sm-block">Aktif Ocak</small>
+                <small class="text-muted d-block d-sm-none">Aktif</small>
             </div>
         </div>
     </div>
     
-    <div class="col-md-3 mb-3">
-        <div class="card text-center">
-            <div class="card-body">
+    <div class="col-6 col-md-3 mb-3">
+        <div class="card text-center h-100">
+            <div class="card-body d-flex flex-column justify-content-center">
                 <i class="fas fa-pause-circle text-warning fa-2x mb-2"></i>
                 <h4 class="text-warning mb-1"><?php echo e($furnaces->where('status', 'idle')->count()); ?></h4>
-                <small class="text-muted">Beklemede</small>
+                <small class="text-muted d-none d-sm-block">Beklemede</small>
+                <small class="text-muted d-block d-sm-none">Bekle</small>
             </div>
         </div>
     </div>
     
-    <div class="col-md-3 mb-3">
-        <div class="card text-center">
-            <div class="card-body">
+    <div class="col-6 col-md-3 mb-3">
+        <div class="card text-center h-100">
+            <div class="card-body d-flex flex-column justify-content-center">
                 <i class="fas fa-tools text-info fa-2x mb-2"></i>
                 <h4 class="text-info mb-1"><?php echo e($furnaces->where('status', 'maintenance')->count()); ?></h4>
-                <small class="text-muted">Bakımda</small>
+                <small class="text-muted d-none d-sm-block">Bakımda</small>
+                <small class="text-muted d-block d-sm-none">Bakım</small>
             </div>
         </div>
     </div>
     
-    <div class="col-md-3 mb-3">
-        <div class="card text-center">
-            <div class="card-body">
+    <div class="col-6 col-md-3 mb-3">
+        <div class="card text-center h-100">
+            <div class="card-body d-flex flex-column justify-content-center">
                 <i class="fas fa-stop-circle text-secondary fa-2x mb-2"></i>
                 <h4 class="text-secondary mb-1"><?php echo e($furnaces->where('status', 'inactive')->count()); ?></h4>
-                <small class="text-muted">Kapalı</small>
+                <small class="text-muted d-none d-sm-block">Kapalı</small>
+                <small class="text-muted d-block d-sm-none">Kapalı</small>
             </div>
         </div>
     </div>
@@ -68,33 +72,43 @@
 <!-- Set Bazlı Ocak Görünümü -->
 <div class="row mb-4">
     <?php $__currentLoopData = $furnaceSets; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $set): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-        <div class="col-md-4 mb-4">
-            <div class="card">
+        <div class="col-12 col-md-4 mb-4">
+            <div class="card h-100">
                 <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
                     <h6 class="mb-0">
                         <i class="fas fa-layer-group me-2"></i>
-                        <?php echo e($set->name); ?>
-
+                        <span class="d-none d-sm-inline"><?php echo e($set->name); ?></span>
+                        <span class="d-inline d-sm-none"><?php echo e($set->name); ?></span>
                     </h6>
                     <span class="badge bg-light text-dark">
-                        <?php echo e($set->furnaces->where('status', 'active')->count()); ?>/<?php echo e($set->furnaces->count()); ?> Aktif
+                        <?php echo e($set->furnaces->where('status', 'active')->count()); ?>/<?php echo e($set->furnaces->count()); ?> 
+                        <span class="d-none d-sm-inline">Aktif</span>
+                        <span class="d-inline d-sm-none">A</span>
                     </span>
                 </div>
                 <div class="card-body p-2">
                     <?php $__currentLoopData = $set->furnaces; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $furnace): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                         <div class="d-flex justify-content-between align-items-center p-2 mb-2 border rounded">
-                            <div>
-                                <strong><?php echo e($furnace->name); ?></strong>
-                                <br><small class="text-muted">Kapasite: <?php echo e($furnace->capacity ?? 'N/A'); ?> ton</small>
-                                <br><small class="text-info">
+                            <div class="flex-grow-1">
+                                <div class="d-flex align-items-center mb-1">
+                                    <strong><?php echo e($furnace->name); ?></strong>
+                                </div>
+                                <div class="small text-muted d-none d-sm-block">
+                                    Kapasite: <?php echo e($furnace->capacity ?? 'N/A'); ?> ton
+                                </div>
+                                <div class="small text-muted d-block d-sm-none">
+                                    <?php echo e($furnace->capacity ?? 'N/A'); ?>t
+                                </div>
+                                <div class="small text-info">
                                     <i class="fas fa-fire"></i> 
-                                    <?php echo e($furnace->castings->count()); ?> döküm 
+                                    <?php echo e($furnace->castings->count()); ?> döküm
                                     <?php if($furnace->castings->count() > 0): ?>
-                                        (Sıradaki: <?php echo e($furnace->castings->count() + 1); ?>.)
+                                        <span class="d-none d-sm-inline">(Sıradaki: <?php echo e($furnace->castings->count() + 1); ?>.)</span>
+                                        <span class="d-inline d-sm-none">(<?php echo e($furnace->castings->count() + 1); ?>)</span>
                                     <?php endif; ?>
-                                </small>
+                                </div>
                             </div>
-                            <div class="text-end">
+                            <div class="text-end ms-2">
                                 <span class="badge 
                                     <?php if($furnace->status === 'active'): ?> bg-success
                                     <?php elseif($furnace->status === 'idle'): ?> bg-warning
@@ -108,10 +122,10 @@
                                     <?php endif; ?>
                                 </span>
                                 <?php if($furnace->status === 'active'): ?>
-                                    <br><small class="text-success">
+                                    <div class="small text-success mt-1">
                                         <i class="fas fa-fire"></i>
                                         <?php echo e($furnace->current_temperature ?? 'N/A'); ?>°C
-                                    </small>
+                                    </div>
                                 <?php endif; ?>
                             </div>
                         </div>
@@ -133,9 +147,10 @@
                 </h5>
                 <small class="text-muted"><?php echo e($furnaces->count()); ?> ocak</small>
             </div>
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-hover">
+            <div class="card-body p-0">
+                <!-- Desktop Table -->
+                <div class="table-responsive d-none d-lg-block">
+                    <table class="table table-hover mb-0">
                         <thead>
                             <tr>
                                 <th>Ocak</th>
@@ -254,6 +269,99 @@
                             <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                         </tbody>
                     </table>
+                </div>
+                
+                <!-- Mobile Card View -->
+                <div class="d-block d-lg-none p-3">
+                    <?php $__currentLoopData = $furnaces; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $furnace): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <h6 class="card-title mb-0">
+                                        <strong><?php echo e($furnace->name); ?></strong>
+                                        <br><small class="text-muted"><?php echo e($furnace->furnaceSet->name); ?></small>
+                                    </h6>
+                                    <span class="badge 
+                                        <?php if($furnace->status === 'active'): ?> bg-success
+                                        <?php elseif($furnace->status === 'idle'): ?> bg-warning
+                                        <?php elseif($furnace->status === 'maintenance'): ?> bg-info
+                                        <?php else: ?> bg-secondary
+                                        <?php endif; ?>">
+                                        <?php if($furnace->status === 'active'): ?> Aktif
+                                        <?php elseif($furnace->status === 'idle'): ?> Beklemede
+                                        <?php elseif($furnace->status === 'maintenance'): ?> Bakımda
+                                        <?php else: ?> Kapalı
+                                        <?php endif; ?>
+                                    </span>
+                                </div>
+                                
+                                <div class="row mb-2">
+                                    <div class="col-6">
+                                        <small class="text-muted">Kapasite:</small>
+                                        <div><?php echo e($furnace->capacity ?? 'N/A'); ?> ton</div>
+                                    </div>
+                                    <div class="col-6">
+                                        <small class="text-muted">Sıcaklık:</small>
+                                        <div>
+                                            <?php if($furnace->current_temperature && $furnace->status === 'active'): ?>
+                                                <span class="text-danger">
+                                                    <i class="fas fa-thermometer-half"></i>
+                                                    <?php echo e($furnace->current_temperature); ?>°C
+                                                </span>
+                                            <?php else: ?>
+                                                <span class="text-muted">-</span>
+                                            <?php endif; ?>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="row mb-2">
+                                    <div class="col-6">
+                                        <small class="text-muted">Son Döküm:</small>
+                                        <div>
+                                            <?php if($furnace->castings->count() > 0): ?>
+                                                <?php $lastCasting = $furnace->castings->first(); ?>
+                                                <strong>#<?php echo e($lastCasting->casting_number); ?></strong>
+                                                <br><small class="text-muted"><?php echo e($lastCasting->casting_date->format('d.m.Y H:i')); ?></small>
+                                            <?php else: ?>
+                                                <span class="text-muted">Döküm yok</span>
+                                            <?php endif; ?>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <small class="text-muted">Aktif Döküm:</small>
+                                        <div>
+                                            <?php $activeCasting = $furnace->castings->where('status', 'active')->first(); ?>
+                                            <?php if($activeCasting): ?>
+                                                <span class="badge bg-success">#<?php echo e($activeCasting->casting_number); ?></span>
+                                                <br><small class="text-muted"><?php echo e($activeCasting->shift); ?> Vardiyası</small>
+                                            <?php else: ?>
+                                                <span class="text-muted">Aktif döküm yok</span>
+                                            <?php endif; ?>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="d-flex gap-2">
+                                    <a href="<?php echo e(route('furnaces.show', $furnace)); ?>" class="btn btn-sm btn-outline-info flex-fill">
+                                        <i class="fas fa-eye"></i> Detay
+                                    </a>
+                                    <a href="<?php echo e(route('furnaces.edit', $furnace)); ?>" class="btn btn-sm btn-outline-primary flex-fill">
+                                        <i class="fas fa-edit"></i> Düzenle
+                                    </a>
+                                    <?php if($furnace->status !== 'active'): ?>
+                                        <button type="button" class="btn btn-sm btn-outline-success" onclick="updateFurnaceStatus(<?php echo e($furnace->id); ?>, 'active')" title="Aktif Yap">
+                                            <i class="fas fa-play"></i>
+                                        </button>
+                                    <?php else: ?>
+                                        <button type="button" class="btn btn-sm btn-outline-warning" onclick="updateFurnaceStatus(<?php echo e($furnace->id); ?>, 'idle')" title="Bekletmeye Al">
+                                            <i class="fas fa-pause"></i>
+                                        </button>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                        </div>
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                 </div>
             </div>
         </div>
@@ -489,4 +597,4 @@ setInterval(() => {
 </script>
 <?php $__env->stopPush(); ?>
 
-<?php echo $__env->make('layouts.app', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH C:\xampp\htdocs\cansan\kk-cansan\resources\views/furnaces/index.blade.php ENDPATH**/ ?>
+<?php echo $__env->make('layouts.app', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH C:\xampp\htdocs\cansan\resources\views/furnaces/index.blade.php ENDPATH**/ ?>

@@ -151,12 +151,3 @@ Route::prefix('api')->name('api.')->group(function () {
 
 // Sistem durumu kontrolü (monitoring için)
 Route::get('/health', [DashboardController::class, 'healthCheck'])->name('health');
-
-// Test rotası (geliştirme aşamasında kullanım için)
-Route::get('/test', function () {
-    return response()->json([
-        'message' => 'Cansan Kalite Kontrol Sistemi çalışıyor',
-        'timestamp' => now(),
-        'version' => '1.0.0'
-    ]);
-})->name('test');

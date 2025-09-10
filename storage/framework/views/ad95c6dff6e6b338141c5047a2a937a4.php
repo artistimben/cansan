@@ -1,23 +1,41 @@
 
 
+<?php $__env->startSection('title', 'Ocak Yönetimi - Cansan Kalite Kontrol'); ?>
+
+<?php $__env->startSection('header', 'Ocak Yönetimi'); ?>
+
+<?php $__env->startSection('header-buttons'); ?>
+    <div class="btn-group d-none d-md-flex" role="group">
+        <a href="<?php echo e(route('furnaces.index')); ?>" class="btn btn-outline-secondary btn-sm">
+            <i class="fas fa-arrow-left me-1"></i>
+            Ocaklara Dön
+        </a>
+        <button type="button" class="btn btn-outline-primary btn-sm" onclick="refreshFurnaces()">
+            <i class="fas fa-sync-alt me-1"></i>
+            Yenile
+        </button>
+    </div>
+    
+    <!-- Mobile buttons -->
+    <div class="d-flex d-md-none gap-2">
+        <a href="<?php echo e(route('furnaces.index')); ?>" class="btn btn-outline-secondary btn-sm">
+            <i class="fas fa-arrow-left"></i>
+        </a>
+        <button type="button" class="btn btn-outline-primary btn-sm" onclick="refreshFurnaces()">
+            <i class="fas fa-sync-alt"></i>
+        </button>
+    </div>
+<?php $__env->stopSection(); ?>
+
 <?php $__env->startSection('content'); ?>
 <div class="container-fluid">
-    <!-- Başlık -->
-    <div class="row">
+    <!-- Description -->
+    <div class="row mb-4">
         <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <div>
-                    <h1 class="h3 mb-0">
-                        <i class="fas fa-cogs text-primary"></i>
-                        Ocak Yönetimi
-                    </h1>
-                    <p class="text-muted mb-0">Refraktör değişimi, bakım ve duruş işlemleri</p>
-                </div>
-                <div>
-                    <a href="<?php echo e(route('furnaces.index')); ?>" class="btn btn-outline-secondary">
-                        <i class="fas fa-arrow-left"></i> Ocaklara Dön
-                    </a>
-                </div>
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i>
+                <span class="d-none d-sm-inline">Refraktör değişimi, bakım ve duruş işlemleri</span>
+                <span class="d-inline d-sm-none">Ocak işlemleri</span>
             </div>
         </div>
     </div>
@@ -25,13 +43,13 @@
     <!-- Ocaklar -->
     <div class="row">
         <?php $__currentLoopData = $furnaces; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $furnace): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-        <div class="col-lg-6 col-xl-4 mb-4">
+        <div class="col-12 col-md-6 col-lg-4 mb-4">
             <div class="card h-100">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="mb-0">
                         <i class="fas fa-fire text-primary"></i>
-                        <?php echo e($furnace->furnaceSet->name); ?> - <?php echo e($furnace->name); ?>
-
+                        <span class="d-none d-sm-inline"><?php echo e($furnace->furnaceSet->name); ?> - <?php echo e($furnace->name); ?></span>
+                        <span class="d-inline d-sm-none"><?php echo e($furnace->name); ?></span>
                     </h5>
                     <span class="badge bg-<?php echo e($furnace->status === 'active' ? 'success' : ($furnace->status === 'maintenance' ? 'warning' : 'secondary')); ?>">
                         <?php echo e(ucfirst($furnace->status)); ?>
@@ -106,35 +124,66 @@
                         <?php if($furnace->status === 'maintenance'): ?>
                             <div class="col-12">
                                 <button class="btn btn-success btn-sm w-100" onclick="showEndMaintenanceModal(<?php echo e($furnace->id); ?>, '<?php echo e($furnace->name); ?>')">
-                                    <i class="fas fa-check"></i> Bakımı Bitir
+                                    <i class="fas fa-check"></i> 
+                                    <span class="d-none d-sm-inline">Bakımı Bitir</span>
+                                    <span class="d-inline d-sm-none">Bitir</span>
                                 </button>
                             </div>
                         <?php elseif($furnace->status === 'shutdown'): ?>
                             <div class="col-12">
                                 <button class="btn btn-success btn-sm w-100" onclick="showEndShutdownModal(<?php echo e($furnace->id); ?>, '<?php echo e($furnace->name); ?>')">
-                                    <i class="fas fa-play"></i> Devreye Al
+                                    <i class="fas fa-play"></i> 
+                                    <span class="d-none d-sm-inline">Devreye Al</span>
+                                    <span class="d-inline d-sm-none">Başlat</span>
                                 </button>
                             </div>
                         <?php else: ?>
-                            <div class="col-6">
-                                <button class="btn btn-warning btn-sm w-100" onclick="showRefractoryModal(<?php echo e($furnace->id); ?>, '<?php echo e($furnace->name); ?>')">
-                                    <i class="fas fa-fire-extinguisher"></i> Refraktör
-                                </button>
+                            <!-- Mobile buttons (stacked) -->
+                            <div class="d-block d-sm-none">
+                                <div class="d-grid gap-2">
+                                    <button class="btn btn-warning btn-sm" onclick="showRefractoryModal(<?php echo e($furnace->id); ?>, '<?php echo e($furnace->name); ?>')">
+                                        <i class="fas fa-fire-extinguisher me-1"></i>Refraktör Değişimi
+                                    </button>
+                                    <button class="btn btn-info btn-sm" onclick="showMaintenanceModal(<?php echo e($furnace->id); ?>, '<?php echo e($furnace->name); ?>')">
+                                        <i class="fas fa-tools me-1"></i>Bakım Başlat
+                                    </button>
+                                    <button class="btn btn-danger btn-sm" onclick="showShutdownModal(<?php echo e($furnace->id); ?>, '<?php echo e($furnace->name); ?>')">
+                                        <i class="fas fa-power-off me-1"></i>Duruş Başlat
+                                    </button>
+                                    <button class="btn btn-secondary btn-sm" onclick="showResetModal(<?php echo e($furnace->id); ?>, '<?php echo e($furnace->name); ?>')">
+                                        <i class="fas fa-redo me-1"></i>Sayaç Sıfırla
+                                    </button>
+                                </div>
                             </div>
-                            <div class="col-6">
-                                <button class="btn btn-info btn-sm w-100" onclick="showMaintenanceModal(<?php echo e($furnace->id); ?>, '<?php echo e($furnace->name); ?>')">
-                                    <i class="fas fa-tools"></i> Bakım
-                                </button>
-                            </div>
-                            <div class="col-6">
-                                <button class="btn btn-danger btn-sm w-100" onclick="showShutdownModal(<?php echo e($furnace->id); ?>, '<?php echo e($furnace->name); ?>')">
-                                    <i class="fas fa-power-off"></i> Duruş
-                                </button>
-                            </div>
-                            <div class="col-6">
-                                <button class="btn btn-secondary btn-sm w-100" onclick="showResetModal(<?php echo e($furnace->id); ?>, '<?php echo e($furnace->name); ?>')">
-                                    <i class="fas fa-redo"></i> Sıfırla
-                                </button>
+                            
+                            <!-- Desktop buttons (grid) -->
+                            <div class="d-none d-sm-block">
+                                <div class="row g-2">
+                                    <div class="col-3">
+                                        <button class="btn btn-warning btn-sm w-100" onclick="showRefractoryModal(<?php echo e($furnace->id); ?>, '<?php echo e($furnace->name); ?>')" title="Refraktör Değişimi">
+                                            <i class="fas fa-fire-extinguisher"></i> 
+                                            <span class="d-none d-md-inline">Refraktör</span>
+                                        </button>
+                                    </div>
+                                    <div class="col-3">
+                                        <button class="btn btn-info btn-sm w-100" onclick="showMaintenanceModal(<?php echo e($furnace->id); ?>, '<?php echo e($furnace->name); ?>')" title="Bakım Başlat">
+                                            <i class="fas fa-tools"></i> 
+                                            <span class="d-none d-md-inline">Bakım</span>
+                                        </button>
+                                    </div>
+                                    <div class="col-3">
+                                        <button class="btn btn-danger btn-sm w-100" onclick="showShutdownModal(<?php echo e($furnace->id); ?>, '<?php echo e($furnace->name); ?>')" title="Duruş Başlat">
+                                            <i class="fas fa-power-off"></i> 
+                                            <span class="d-none d-md-inline">Duruş</span>
+                                        </button>
+                                    </div>
+                                    <div class="col-3">
+                                        <button class="btn btn-secondary btn-sm w-100" onclick="showResetModal(<?php echo e($furnace->id); ?>, '<?php echo e($furnace->name); ?>')" title="Döküm Sayacını Sıfırla">
+                                            <i class="fas fa-redo"></i> 
+                                            <span class="d-none d-md-inline">Sıfırla</span>
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
                         <?php endif; ?>
                     </div>
@@ -501,7 +550,12 @@ function showToast(message, type) {
     // Toast gösterimi (mevcut toast sisteminizi kullanın)
     console.log(type.toUpperCase() + ':', message);
 }
+
+// Furnace management refresh
+function refreshFurnaces() {
+    location.reload();
+}
 </script>
 <?php $__env->stopPush(); ?>
 
-<?php echo $__env->make('layouts.app', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH C:\xampp\htdocs\cansan\kk-cansan\resources\views/furnace-management/index.blade.php ENDPATH**/ ?>
+<?php echo $__env->make('layouts.app', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH C:\xampp\htdocs\cansan\resources\views/furnace-management/index.blade.php ENDPATH**/ ?>

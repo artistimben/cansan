@@ -5,7 +5,8 @@
 @section('header', 'Günlük Rapor')
 
 @section('header-buttons')
-    <div class="btn-group" role="group">
+    <!-- Desktop buttons -->
+    <div class="btn-group d-none d-md-flex" role="group">
         <input type="date" class="form-control form-control-sm" id="reportDate" value="{{ request('date', date('Y-m-d')) }}" onchange="changeDate()">
         <button type="button" class="btn btn-outline-primary btn-sm" onclick="printReport()">
             <i class="fas fa-print me-1"></i>
@@ -18,6 +19,20 @@
         <a href="{{ route('reports.index') }}" class="btn btn-outline-secondary btn-sm">
             <i class="fas fa-arrow-left me-1"></i>
             Geri
+        </a>
+    </div>
+    
+    <!-- Mobile buttons -->
+    <div class="d-flex d-md-none gap-2">
+        <input type="date" class="form-control form-control-sm" id="reportDateMobile" value="{{ request('date', date('Y-m-d')) }}" onchange="changeDate()">
+        <button type="button" class="btn btn-outline-primary btn-sm" onclick="printReport()">
+            <i class="fas fa-print"></i>
+        </button>
+        <button type="button" class="btn btn-outline-success btn-sm" onclick="exportExcel()">
+            <i class="fas fa-file-excel"></i>
+        </button>
+        <a href="{{ route('reports.index') }}" class="btn btn-outline-secondary btn-sm">
+            <i class="fas fa-arrow-left"></i>
         </a>
     </div>
 @endsection
@@ -41,42 +56,46 @@
 
 <!-- Özet İstatistikler -->
 <div class="row mb-4">
-    <div class="col-md-3 mb-3">
-        <div class="card text-center">
+    <div class="col-6 col-md-3 mb-3">
+        <div class="card stat-card text-center">
             <div class="card-body">
                 <i class="fas fa-fire text-primary fa-2x mb-2"></i>
                 <h3 class="text-primary mb-1">0</h3>
-                <small class="text-muted">Toplam Döküm</small>
+                <small class="text-muted d-none d-sm-block">Toplam Döküm</small>
+                <small class="text-muted d-block d-sm-none">Döküm</small>
             </div>
         </div>
     </div>
     
-    <div class="col-md-3 mb-3">
-        <div class="card text-center">
+    <div class="col-6 col-md-3 mb-3">
+        <div class="card stat-card text-center">
             <div class="card-body">
                 <i class="fas fa-vial text-success fa-2x mb-2"></i>
                 <h3 class="text-success mb-1">0</h3>
-                <small class="text-muted">Toplam Prova</small>
+                <small class="text-muted d-none d-sm-block">Toplam Prova</small>
+                <small class="text-muted d-block d-sm-none">Prova</small>
             </div>
         </div>
     </div>
     
-    <div class="col-md-3 mb-3">
-        <div class="card text-center">
+    <div class="col-6 col-md-3 mb-3">
+        <div class="card stat-card text-center">
             <div class="card-body">
                 <i class="fas fa-check-circle text-info fa-2x mb-2"></i>
                 <h3 class="text-info mb-1">0%</h3>
-                <small class="text-muted">Kalite Oranı</small>
+                <small class="text-muted d-none d-sm-block">Kalite Oranı</small>
+                <small class="text-muted d-block d-sm-none">Kalite</small>
             </div>
         </div>
     </div>
     
-    <div class="col-md-3 mb-3">
-        <div class="card text-center">
+    <div class="col-6 col-md-3 mb-3">
+        <div class="card stat-card text-center">
             <div class="card-body">
                 <i class="fas fa-tools text-warning fa-2x mb-2"></i>
                 <h3 class="text-warning mb-1">0</h3>
-                <small class="text-muted">Ham Madde Ekleme</small>
+                <small class="text-muted d-none d-sm-block">Ham Madde Ekleme</small>
+                <small class="text-muted d-block d-sm-none">Ham Madde</small>
             </div>
         </div>
     </div>
@@ -93,7 +112,8 @@
                 </h5>
             </div>
             <div class="card-body">
-                <div class="table-responsive">
+                <!-- Desktop Table -->
+                <div class="table-responsive d-none d-lg-block">
                     <table class="table table-striped">
                         <thead>
                             <tr>
@@ -137,6 +157,96 @@
                         </tbody>
                     </table>
                 </div>
+                
+                <!-- Mobile Card View -->
+                <div class="d-block d-lg-none">
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <h6 class="card-title mb-0">Set 1 - Ocak 1</h6>
+                                <span class="badge bg-success">Aktif</span>
+                            </div>
+                            <div class="row">
+                                <div class="col-6">
+                                    <small class="text-muted">Döküm Sayısı:</small>
+                                    <div class="fw-bold">0</div>
+                                </div>
+                                <div class="col-6">
+                                    <small class="text-muted">Prova Sayısı:</small>
+                                    <div class="fw-bold">0</div>
+                                </div>
+                            </div>
+                            <div class="row mt-2">
+                                <div class="col-6">
+                                    <small class="text-muted">Kalite Oranı:</small>
+                                    <div class="fw-bold">0%</div>
+                                </div>
+                                <div class="col-6">
+                                    <small class="text-muted">Son Döküm:</small>
+                                    <div class="fw-bold">-</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <h6 class="card-title mb-0">Set 2 - Ocak 3</h6>
+                                <span class="badge bg-success">Aktif</span>
+                            </div>
+                            <div class="row">
+                                <div class="col-6">
+                                    <small class="text-muted">Döküm Sayısı:</small>
+                                    <div class="fw-bold">0</div>
+                                </div>
+                                <div class="col-6">
+                                    <small class="text-muted">Prova Sayısı:</small>
+                                    <div class="fw-bold">0</div>
+                                </div>
+                            </div>
+                            <div class="row mt-2">
+                                <div class="col-6">
+                                    <small class="text-muted">Kalite Oranı:</small>
+                                    <div class="fw-bold">0%</div>
+                                </div>
+                                <div class="col-6">
+                                    <small class="text-muted">Son Döküm:</small>
+                                    <div class="fw-bold">-</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <h6 class="card-title mb-0">Set 3 - Ocak 5</h6>
+                                <span class="badge bg-success">Aktif</span>
+                            </div>
+                            <div class="row">
+                                <div class="col-6">
+                                    <small class="text-muted">Döküm Sayısı:</small>
+                                    <div class="fw-bold">0</div>
+                                </div>
+                                <div class="col-6">
+                                    <small class="text-muted">Prova Sayısı:</small>
+                                    <div class="fw-bold">0</div>
+                                </div>
+                            </div>
+                            <div class="row mt-2">
+                                <div class="col-6">
+                                    <small class="text-muted">Kalite Oranı:</small>
+                                    <div class="fw-bold">0%</div>
+                                </div>
+                                <div class="col-6">
+                                    <small class="text-muted">Son Döküm:</small>
+                                    <div class="fw-bold">-</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -144,30 +254,36 @@
 
 <!-- Kalite Analizi -->
 <div class="row mb-4">
-    <div class="col-md-6">
+    <div class="col-12 col-lg-6 mb-4 mb-lg-0">
         <div class="card">
             <div class="card-header">
                 <h5 class="mb-0">
                     <i class="fas fa-chart-pie me-2"></i>
-                    Kalite Dağılımı
+                    <span class="d-none d-sm-inline">Kalite Dağılımı</span>
+                    <span class="d-inline d-sm-none">Kalite</span>
                 </h5>
             </div>
             <div class="card-body">
-                <canvas id="qualityChart" height="300"></canvas>
+                <div style="position: relative; height: 300px;">
+                    <canvas id="qualityChart"></canvas>
+                </div>
             </div>
         </div>
     </div>
     
-    <div class="col-md-6">
+    <div class="col-12 col-lg-6">
         <div class="card">
             <div class="card-header">
                 <h5 class="mb-0">
                     <i class="fas fa-chart-line me-2"></i>
-                    Saatlik Döküm Trendi
+                    <span class="d-none d-sm-inline">Saatlik Döküm Trendi</span>
+                    <span class="d-inline d-sm-none">Trend</span>
                 </h5>
             </div>
             <div class="card-body">
-                <canvas id="trendChart" height="300"></canvas>
+                <div style="position: relative; height: 300px;">
+                    <canvas id="trendChart"></canvas>
+                </div>
             </div>
         </div>
     </div>
@@ -185,8 +301,9 @@
             </div>
             <div class="card-body">
                 <div class="row">
-                    <div class="col-md-6">
-                        <div class="table-responsive">
+                    <div class="col-12 col-lg-6 mb-4 mb-lg-0">
+                        <!-- Desktop Table -->
+                        <div class="table-responsive d-none d-md-block">
                             <table class="table table-sm">
                                 <thead>
                                     <tr>
@@ -214,9 +331,39 @@
                                 </tbody>
                             </table>
                         </div>
+                        
+                        <!-- Mobile Card View -->
+                        <div class="d-block d-md-none">
+                            <div class="card mb-2">
+                                <div class="card-body py-2">
+                                    <div class="d-flex justify-content-between">
+                                        <span class="fw-bold">Karbon</span>
+                                        <span>0 kg (0%)</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card mb-2">
+                                <div class="card-body py-2">
+                                    <div class="d-flex justify-content-between">
+                                        <span class="fw-bold">Mangan</span>
+                                        <span>0 kg (0%)</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card mb-2">
+                                <div class="card-body py-2">
+                                    <div class="d-flex justify-content-between">
+                                        <span class="fw-bold">Silisyum</span>
+                                        <span>0 kg (0%)</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="col-md-6">
-                        <canvas id="materialChart" height="200"></canvas>
+                    <div class="col-12 col-lg-6">
+                        <div style="position: relative; height: 200px;">
+                            <canvas id="materialChart"></canvas>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -235,7 +382,8 @@
                 </h5>
             </div>
             <div class="card-body">
-                <div class="table-responsive">
+                <!-- Desktop Table -->
+                <div class="table-responsive d-none d-lg-block">
                     <table class="table">
                         <thead>
                             <tr>
@@ -275,6 +423,93 @@
                         </tbody>
                     </table>
                 </div>
+                
+                <!-- Mobile Card View -->
+                <div class="d-block d-lg-none">
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <span class="badge bg-primary">A Vardiyası</span>
+                            </div>
+                            <div class="row">
+                                <div class="col-6">
+                                    <small class="text-muted">Döküm Sayısı:</small>
+                                    <div class="fw-bold">0</div>
+                                </div>
+                                <div class="col-6">
+                                    <small class="text-muted">Prova Sayısı:</small>
+                                    <div class="fw-bold">0</div>
+                                </div>
+                            </div>
+                            <div class="row mt-2">
+                                <div class="col-6">
+                                    <small class="text-muted">Kalite Oranı:</small>
+                                    <div class="fw-bold">0%</div>
+                                </div>
+                                <div class="col-6">
+                                    <small class="text-muted">Ham Madde:</small>
+                                    <div class="fw-bold">0</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <span class="badge bg-success">B Vardiyası</span>
+                            </div>
+                            <div class="row">
+                                <div class="col-6">
+                                    <small class="text-muted">Döküm Sayısı:</small>
+                                    <div class="fw-bold">0</div>
+                                </div>
+                                <div class="col-6">
+                                    <small class="text-muted">Prova Sayısı:</small>
+                                    <div class="fw-bold">0</div>
+                                </div>
+                            </div>
+                            <div class="row mt-2">
+                                <div class="col-6">
+                                    <small class="text-muted">Kalite Oranı:</small>
+                                    <div class="fw-bold">0%</div>
+                                </div>
+                                <div class="col-6">
+                                    <small class="text-muted">Ham Madde:</small>
+                                    <div class="fw-bold">0</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <span class="badge bg-warning">C Vardiyası</span>
+                            </div>
+                            <div class="row">
+                                <div class="col-6">
+                                    <small class="text-muted">Döküm Sayısı:</small>
+                                    <div class="fw-bold">0</div>
+                                </div>
+                                <div class="col-6">
+                                    <small class="text-muted">Prova Sayısı:</small>
+                                    <div class="fw-bold">0</div>
+                                </div>
+                            </div>
+                            <div class="row mt-2">
+                                <div class="col-6">
+                                    <small class="text-muted">Kalite Oranı:</small>
+                                    <div class="fw-bold">0%</div>
+                                </div>
+                                <div class="col-6">
+                                    <small class="text-muted">Ham Madde:</small>
+                                    <div class="fw-bold">0</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -300,7 +535,8 @@
 <script>
 // Tarih değiştir
 function changeDate() {
-    const date = document.getElementById('reportDate').value;
+    const dateInput = document.getElementById('reportDate') || document.getElementById('reportDateMobile');
+    const date = dateInput.value;
     window.location.href = `{{ route('reports.daily') }}?date=${date}`;
 }
 

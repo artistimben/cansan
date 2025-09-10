@@ -9,13 +9,17 @@
                 <div>
                     <h1 class="h3 mb-0">
                         <i class="fas fa-fire text-primary"></i>
-                        Döküm Yönetimi
+                        <span class="d-none d-sm-inline">Döküm Yönetimi</span>
+                        <span class="d-inline d-sm-none">Dökümler</span>
                     </h1>
-                    <p class="text-muted mb-0">Ocak dökümlerini yönetin ve takip edin</p>
+                    <p class="text-muted mb-0 d-none d-md-block">Ocak dökümlerini yönetin ve takip edin</p>
+                    <p class="text-muted mb-0 d-block d-md-none">Döküm takibi</p>
                 </div>
                 <div>
                     <a href="<?php echo e(route('castings.create')); ?>" class="btn btn-primary">
-                        <i class="fas fa-plus"></i> Yeni Döküm Başlat
+                        <i class="fas fa-plus"></i> 
+                        <span class="d-none d-sm-inline">Yeni Döküm Başlat</span>
+                        <span class="d-inline d-sm-none">Yeni</span>
                     </a>
                 </div>
             </div>
@@ -28,13 +32,15 @@
             <div class="card">
                 <div class="card-header">
                     <h5 class="mb-0">
-                        <i class="fas fa-filter"></i> Filtreler
+                        <i class="fas fa-filter"></i> 
+                        <span class="d-none d-sm-inline">Filtreler</span>
+                        <span class="d-inline d-sm-none">Filtre</span>
                     </h5>
                 </div>
                 <div class="card-body">
                     <form method="GET" action="<?php echo e(route('castings.index')); ?>">
                         <div class="row">
-                            <div class="col-md-3">
+                            <div class="col-12 col-sm-6 col-md-3 mb-3">
                                 <label class="form-label">Ocak</label>
                                 <select name="furnace_id" class="form-select">
                                     <option value="">Tüm Ocaklar</option>
@@ -47,7 +53,7 @@
                                     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                 </select>
                             </div>
-                            <div class="col-md-2">
+                            <div class="col-6 col-sm-3 col-md-2 mb-3">
                                 <label class="form-label">Durum</label>
                                 <select name="status" class="form-select">
                                     <option value="">Tüm Durumlar</option>
@@ -60,7 +66,7 @@
                                     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                 </select>
                             </div>
-                            <div class="col-md-2">
+                            <div class="col-6 col-sm-3 col-md-2 mb-3">
                                 <label class="form-label">Vardiya</label>
                                 <select name="shift" class="form-select">
                                     <option value="">Tüm Vardiyalar</option>
@@ -73,22 +79,24 @@
                                     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                 </select>
                             </div>
-                            <div class="col-md-2">
-                                <label class="form-label">Başlangıç Tarihi</label>
+                            <div class="col-6 col-sm-6 col-md-2 mb-3">
+                                <label class="form-label">Başlangıç</label>
                                 <input type="date" name="date_from" class="form-control" 
                                        value="<?php echo e(request('date_from')); ?>">
                             </div>
-                            <div class="col-md-2">
-                                <label class="form-label">Bitiş Tarihi</label>
+                            <div class="col-6 col-sm-6 col-md-2 mb-3">
+                                <label class="form-label">Bitiş</label>
                                 <input type="date" name="date_to" class="form-control" 
                                        value="<?php echo e(request('date_to')); ?>">
                             </div>
-                            <div class="col-md-1 d-flex align-items-end">
+                            <div class="col-12 col-md-1 d-flex align-items-end justify-content-center justify-content-md-start">
                                 <button type="submit" class="btn btn-outline-primary me-2">
                                     <i class="fas fa-search"></i>
+                                    <span class="d-none d-sm-inline ms-1">Ara</span>
                                 </button>
                                 <a href="<?php echo e(route('castings.index')); ?>" class="btn btn-outline-secondary">
                                     <i class="fas fa-times"></i>
+                                    <span class="d-none d-sm-inline ms-1">Temizle</span>
                                 </a>
                             </div>
                         </div>
@@ -110,7 +118,8 @@
                 </div>
                 <div class="card-body p-0">
                     <?php if($castings->count() > 0): ?>
-                        <div class="table-responsive">
+                        <!-- Desktop Table -->
+                        <div class="table-responsive d-none d-lg-block">
                             <table class="table table-hover mb-0">
                                 <thead class="table-light">
                                     <tr>
@@ -228,6 +237,118 @@
                             </table>
                         </div>
                         
+                        <!-- Mobile Card View -->
+                        <div class="d-block d-lg-none p-3">
+                            <?php $__currentLoopData = $castings; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $casting): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <div class="card mb-3">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between align-items-start mb-2">
+                                            <h6 class="card-title mb-0">
+                                                <strong class="text-primary">#<?php echo e($casting->casting_number); ?></strong>
+                                            </h6>
+                                            <span class="badge 
+                                                <?php if($casting->status === 'active'): ?> bg-success
+                                                <?php elseif($casting->status === 'completed'): ?> bg-primary
+                                                <?php elseif($casting->status === 'cancelled'): ?> bg-danger
+                                                <?php else: ?> bg-secondary
+                                                <?php endif; ?>">
+                                                <?php if($casting->status === 'active'): ?> Aktif
+                                                <?php elseif($casting->status === 'completed'): ?> Tamamlandı
+                                                <?php elseif($casting->status === 'cancelled'): ?> İptal
+                                                <?php else: ?> <?php echo e($casting->status); ?>
+
+                                                <?php endif; ?>
+                                            </span>
+                                        </div>
+                                        
+                                        <div class="row mb-2">
+                                            <div class="col-6">
+                                                <small class="text-muted">Ocak:</small>
+                                                <div class="d-flex align-items-center">
+                                                    <div class="furnace-indicator bg-<?php echo e($casting->furnace->status === 'active' ? 'success' : 'secondary'); ?> me-2"></div>
+                                                    <div>
+                                                        <div class="fw-bold"><?php echo e($casting->furnace->name); ?></div>
+                                                        <small class="text-muted"><?php echo e($casting->furnace->furnaceSet->name); ?></small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-6">
+                                                <small class="text-muted">Vardiya:</small>
+                                                <div>
+                                                    <span class="badge bg-<?php echo e($casting->shift === 'Gündüz' ? 'warning' : 'info'); ?>">
+                                                        <?php echo e($casting->shift); ?>
+
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="row mb-2">
+                                            <div class="col-6">
+                                                <small class="text-muted">Tarih:</small>
+                                                <div><?php echo e($casting->casting_date->format('d.m.Y')); ?></div>
+                                                <small class="text-muted"><?php echo e($casting->casting_date->format('H:i')); ?></small>
+                                            </div>
+                                            <div class="col-6">
+                                                <small class="text-muted">Operatör:</small>
+                                                <div><?php echo e($casting->operator_name); ?></div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="row mb-3">
+                                            <div class="col-6">
+                                                <small class="text-muted">Prova Sayısı:</small>
+                                                <div class="d-flex align-items-center">
+                                                    <span class="badge bg-info me-1"><?php echo e($casting->samples->count()); ?></span>
+                                                    <?php if($casting->samples->where('quality_status', 'approved')->count() > 0): ?>
+                                                        <span class="badge bg-success me-1">
+                                                            <?php echo e($casting->samples->where('quality_status', 'approved')->count()); ?> ✓
+                                                        </span>
+                                                    <?php endif; ?>
+                                                    <?php if($casting->samples->where('quality_status', 'pending')->count() > 0): ?>
+                                                        <span class="badge bg-warning me-1">
+                                                            <?php echo e($casting->samples->where('quality_status', 'pending')->count()); ?> ?
+                                                        </span>
+                                                    <?php endif; ?>
+                                                </div>
+                                            </div>
+                                            <div class="col-6">
+                                                <small class="text-muted">Süre:</small>
+                                                <div>
+                                                    <?php if($casting->completed_at): ?>
+                                                        <?php echo e($casting->started_at->diffInMinutes($casting->completed_at)); ?> dk
+                                                    <?php else: ?>
+                                                        <span class="text-success">
+                                                            <?php echo e($casting->started_at->diffInMinutes(now())); ?> dk
+                                                            <i class="fas fa-clock fa-spin"></i>
+                                                        </span>
+                                                    <?php endif; ?>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="d-flex gap-2">
+                                            <a href="<?php echo e(route('castings.show', $casting)); ?>" 
+                                               class="btn btn-sm btn-outline-primary flex-fill">
+                                                <i class="fas fa-eye"></i> Detay
+                                            </a>
+                                            <?php if($casting->status === 'active'): ?>
+                                                <button type="button" 
+                                                        class="btn btn-sm btn-outline-success complete-casting flex-fill" 
+                                                        data-casting-id="<?php echo e($casting->id); ?>">
+                                                    <i class="fas fa-check"></i> Tamamla
+                                                </button>
+                                            <?php endif; ?>
+                                            <a href="<?php echo e(route('samples.create', ['casting_id' => $casting->id])); ?>" 
+                                               class="btn btn-sm btn-outline-info flex-fill">
+                                                <i class="fas fa-plus"></i> Prova
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                        </div>
+                        
                         <!-- Pagination -->
                         <div class="card-footer">
                             <?php echo e($castings->links()); ?>
@@ -284,4 +405,4 @@ $(document).ready(function() {
 </script>
 <?php $__env->stopPush(); ?>
 
-<?php echo $__env->make('layouts.app', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH C:\xampp\htdocs\cansan\kk-cansan\resources\views/castings/index.blade.php ENDPATH**/ ?>
+<?php echo $__env->make('layouts.app', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH C:\xampp\htdocs\cansan\resources\views/castings/index.blade.php ENDPATH**/ ?>

@@ -5,7 +5,7 @@
 <?php $__env->startSection('header', 'Kontrol Paneli'); ?>
 
 <?php $__env->startSection('header-buttons'); ?>
-    <div class="btn-group" role="group">
+    <div class="btn-group d-none d-md-flex" role="group">
         <a href="<?php echo e(route('castings.create')); ?>" class="btn btn-success btn-sm" onclick="console.log('Yeni Döküm butonu tıklandı')">
             <i class="fas fa-plus-circle me-1"></i>
             Yeni Döküm
@@ -23,61 +23,97 @@
             <span id="auto-refresh-text">Otomatik Yenileme</span>
         </button>
     </div>
+    
+    <!-- Mobile buttons -->
+    <div class="d-flex d-md-none gap-2">
+        <a href="<?php echo e(route('castings.create')); ?>" class="btn btn-success btn-sm">
+            <i class="fas fa-plus-circle"></i>
+        </a>
+        <a href="<?php echo e(route('samples.create')); ?>" class="btn btn-primary btn-sm">
+            <i class="fas fa-plus"></i>
+        </a>
+        <button type="button" class="btn btn-outline-primary btn-sm" onclick="refreshDashboard()">
+            <i class="fas fa-sync-alt"></i>
+        </button>
+    </div>
 <?php $__env->stopSection(); ?>
 
 <?php $__env->startSection('content'); ?>
 <!-- Sistem Durumu Kartları -->
 <div class="row mb-4">
-    <div class="col-md-3 mb-3">
-        <div class="card stat-card">
-            <div class="card-body text-center">
+    <div class="col-6 col-md-3 mb-3">
+        <div class="card stat-card h-100">
+            <div class="card-body text-center d-flex flex-column justify-content-center">
                 <div class="stat-number" id="total-castings"><?php echo e($dailyStats['total_castings']); ?></div>
-                <div class="text-muted">Bugünkü Döküm</div>
-                <small class="text-success">
+                <div class="text-muted d-none d-sm-block">Bugünkü Döküm</div>
+                <div class="text-muted d-block d-sm-none">Döküm</div>
+                <small class="text-success d-none d-md-block">
                     <i class="fas fa-arrow-up me-1"></i>
                     Aktif Ocak: <?php echo e($dailyStats['active_furnaces']); ?>
 
                 </small>
+                <small class="text-success d-block d-md-none">
+                    <i class="fas fa-fire me-1"></i>
+                    <?php echo e($dailyStats['active_furnaces']); ?> Ocak
+                </small>
             </div>
         </div>
     </div>
     
-    <div class="col-md-3 mb-3">
-        <div class="card stat-card">
-            <div class="card-body text-center">
+    <div class="col-6 col-md-3 mb-3">
+        <div class="card stat-card h-100">
+            <div class="card-body text-center d-flex flex-column justify-content-center">
                 <div class="stat-number" id="total-samples"><?php echo e($dailyStats['total_samples']); ?></div>
-                <div class="text-muted">Bugünkü Prova</div>
-                <small class="text-info">
+                <div class="text-muted d-none d-sm-block">Bugünkü Prova</div>
+                <div class="text-muted d-block d-sm-none">Prova</div>
+                <small class="text-info d-none d-md-block">
                     <i class="fas fa-vial me-1"></i>
                     Haftalık: <?php echo e($weeklyStats['total_samples']); ?>
 
                 </small>
-            </div>
-        </div>
-    </div>
-    
-    <div class="col-md-3 mb-3">
-        <div class="card stat-card">
-            <div class="card-body text-center">
-                <div class="stat-number text-success" id="approved-samples"><?php echo e($dailyStats['approved_samples']); ?></div>
-                <div class="text-muted">Onaylanan Prova</div>
-                <small class="text-warning">
-                    <i class="fas fa-hourglass-half me-1"></i>
-                    Bekleyen: <?php echo e($dailyStats['pending_samples']); ?>
+                <small class="text-info d-block d-md-none">
+                    <i class="fas fa-vial me-1"></i>
+                    Hafta: <?php echo e($weeklyStats['total_samples']); ?>
 
                 </small>
             </div>
         </div>
     </div>
     
-    <div class="col-md-3 mb-3">
-        <div class="card stat-card">
-            <div class="card-body text-center">
+    <div class="col-6 col-md-3 mb-3">
+        <div class="card stat-card h-100">
+            <div class="card-body text-center d-flex flex-column justify-content-center">
+                <div class="stat-number text-success" id="approved-samples"><?php echo e($dailyStats['approved_samples']); ?></div>
+                <div class="text-muted d-none d-sm-block">Onaylanan Prova</div>
+                <div class="text-muted d-block d-sm-none">Onay</div>
+                <small class="text-warning d-none d-md-block">
+                    <i class="fas fa-hourglass-half me-1"></i>
+                    Bekleyen: <?php echo e($dailyStats['pending_samples']); ?>
+
+                </small>
+                <small class="text-warning d-block d-md-none">
+                    <i class="fas fa-clock me-1"></i>
+                    Bekle: <?php echo e($dailyStats['pending_samples']); ?>
+
+                </small>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-6 col-md-3 mb-3">
+        <div class="card stat-card h-100">
+            <div class="card-body text-center d-flex flex-column justify-content-center">
                 <div class="stat-number text-primary" id="quality-rate"><?php echo e($weeklyStats['quality_rate']); ?>%</div>
-                <div class="text-muted">Kalite Oranı</div>
-                <small class="text-danger">
+                <div class="text-muted d-none d-sm-block">Kalite Oranı</div>
+                <div class="text-muted d-block d-sm-none">Kalite</div>
+                <small class="text-danger d-none d-md-block">
                     <i class="fas fa-times-circle me-1"></i>
                     Reddedilen: <?php echo e($dailyStats['rejected_samples']); ?>
+
+                </small>
+                <small class="text-danger d-block d-md-none">
+                    <i class="fas fa-times me-1"></i>
+                    Red: <?php echo e($dailyStats['rejected_samples']); ?>
 
                 </small>
             </div>
@@ -87,14 +123,15 @@
 
 <!-- Ocak Durumu ve Aktif Dökümler -->
 <div class="row mb-4">
-    <div class="col-md-8">
+    <div class="col-12 col-lg-8 mb-4 mb-lg-0">
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h5 class="mb-0">
                     <i class="fas fa-fire me-2"></i>
-                    Ocak Durumu ve Aktif Dökümler
+                    <span class="d-none d-sm-inline">Ocak Durumu ve Aktif Dökümler</span>
+                    <span class="d-inline d-sm-none">Ocaklar</span>
                 </h5>
-                <span class="badge bg-success"><?php echo e(count($activeFurnaces)); ?> Aktif Ocak</span>
+                <span class="badge bg-success"><?php echo e(count($activeFurnaces)); ?> Aktif</span>
             </div>
             <div class="card-body">
                 <?php if(empty($setStats)): ?>
@@ -105,24 +142,45 @@
                 <?php else: ?>
                     <div class="row">
                         <?php $__currentLoopData = $setStats; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $setStat): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                            <div class="col-md-4 mb-3">
-                                <div class="card border-0 bg-light">
-                                    <div class="card-body">
+                            <div class="col-12 col-sm-6 col-lg-4 mb-3">
+                                <div class="card border-0 bg-light h-100">
+                                    <div class="card-body d-flex flex-column">
                                         <div class="d-flex align-items-center mb-2">
                                             <span class="furnace-status <?php echo e($setStat['active_furnace'] ? 'furnace-active' : 'furnace-inactive'); ?>"></span>
-                                            <h6 class="mb-0"><?php echo e($setStat['set']->name); ?></h6>
+                                            <h6 class="mb-0 flex-grow-1"><?php echo e($setStat['set']->name); ?></h6>
                                         </div>
                                         
                                         <?php if($setStat['active_furnace']): ?>
-                                            <p class="mb-1">
-                                                <strong><?php echo e($setStat['active_furnace']->name); ?></strong>
-                                                <span class="badge bg-success badge-sm ms-1">Aktif</span>
-                                            </p>
+                                            <div class="mb-2">
+                                                <div class="d-flex align-items-center justify-content-between">
+                                                    <strong class="text-primary"><?php echo e($setStat['active_furnace']->name); ?></strong>
+                                                    <span class="badge bg-success badge-sm">Aktif</span>
+                                                </div>
+                                            </div>
                                             
-                                            <div class="small text-muted">
-                                                <div>Günlük: <?php echo e($setStat['daily_castings']); ?> döküm</div>
-                                                <div>Haftalık: <?php echo e($setStat['weekly_castings']); ?> döküm</div>
-                                                <div>Aylık: <?php echo e($setStat['monthly_castings']); ?> döküm</div>
+                                            <div class="small text-muted d-none d-md-block mb-2">
+                                                <div class="row">
+                                                    <div class="col-4 text-center">
+                                                        <div class="fw-bold"><?php echo e($setStat['daily_castings']); ?></div>
+                                                        <div>Günlük</div>
+                                                    </div>
+                                                    <div class="col-4 text-center">
+                                                        <div class="fw-bold"><?php echo e($setStat['weekly_castings']); ?></div>
+                                                        <div>Haftalık</div>
+                                                    </div>
+                                                    <div class="col-4 text-center">
+                                                        <div class="fw-bold"><?php echo e($setStat['monthly_castings']); ?></div>
+                                                        <div>Aylık</div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="small text-muted d-block d-md-none mb-2">
+                                                <div class="d-flex justify-content-between">
+                                                    <span>Gün: <strong><?php echo e($setStat['daily_castings']); ?></strong></span>
+                                                    <span>Hafta: <strong><?php echo e($setStat['weekly_castings']); ?></strong></span>
+                                                    <span>Ay: <strong><?php echo e($setStat['monthly_castings']); ?></strong></span>
+                                                </div>
                                             </div>
                                             
                                             <?php
@@ -130,21 +188,26 @@
                                             ?>
                                             
                                             <?php if($activeCasting): ?>
-                                                <div class="mt-2 p-2 bg-white rounded">
+                                                <div class="mt-auto p-2 bg-white rounded">
                                                     <div class="small">
-                                                        <strong>Döküm #<?php echo e($activeCasting->casting_number); ?></strong>
-                                                        <div>Prova: <?php echo e($activeCasting->samples->count()); ?> adet</div>
-                                                        <div>Durum: 
+                                                        <div class="d-flex justify-content-between align-items-center mb-1">
+                                                            <strong>Döküm #<?php echo e($activeCasting->casting_number); ?></strong>
                                                             <span class="badge <?php echo e($activeCasting->getQualityStatus() === 'approved' ? 'bg-success' : ($activeCasting->getQualityStatus() === 'rejected' ? 'bg-danger' : 'bg-warning')); ?>">
                                                                 <?php echo e(ucfirst($activeCasting->getQualityStatus())); ?>
 
                                                             </span>
                                                         </div>
+                                                        <div class="text-muted">Prova: <?php echo e($activeCasting->samples->count()); ?> adet</div>
                                                     </div>
                                                 </div>
                                             <?php endif; ?>
                                         <?php else: ?>
-                                            <p class="text-muted mb-0">Aktif ocak yok</p>
+                                            <div class="mt-auto">
+                                                <p class="text-muted mb-0 text-center">
+                                                    <i class="fas fa-power-off me-1"></i>
+                                                    Aktif ocak yok
+                                                </p>
+                                            </div>
                                         <?php endif; ?>
                                     </div>
                                 </div>
@@ -156,16 +219,19 @@
         </div>
     </div>
     
-    <div class="col-md-4">
+    <div class="col-12 col-lg-4">
         <div class="card">
             <div class="card-header">
                 <h5 class="mb-0">
                     <i class="fas fa-chart-pie me-2"></i>
-                    Günlük Kalite Dağılımı
+                    <span class="d-none d-sm-inline">Günlük Kalite Dağılımı</span>
+                    <span class="d-inline d-sm-none">Kalite</span>
                 </h5>
             </div>
             <div class="card-body">
-                <canvas id="qualityChart" width="300" height="200" style="max-height: 200px;"></canvas>
+                <div class="chart-container" style="position: relative; height: 200px; max-height: 200px;">
+                    <canvas id="qualityChart"></canvas>
+                </div>
                 
                 <div class="mt-3">
                     <div class="d-flex justify-content-between align-items-center mb-1">
@@ -192,15 +258,17 @@
 
 <!-- Son Aktiviteler -->
 <div class="row">
-    <div class="col-md-6">
+    <div class="col-12 col-lg-6 mb-4 mb-lg-0">
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h5 class="mb-0">
                     <i class="fas fa-clock me-2"></i>
-                    Son Provalar
+                    <span class="d-none d-sm-inline">Son Provalar</span>
+                    <span class="d-inline d-sm-none">Provalar</span>
                 </h5>
                 <a href="<?php echo e(route('samples.index')); ?>" class="btn btn-outline-primary btn-sm">
-                    Tümünü Gör
+                    <span class="d-none d-sm-inline">Tümünü Gör</span>
+                    <span class="d-inline d-sm-none">Tümü</span>
                 </a>
             </div>
             <div class="card-body">
@@ -212,14 +280,16 @@
                 <?php else: ?>
                     <div class="list-group list-group-flush">
                         <?php $__currentLoopData = $recentActivities['latest_samples']->take(5); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $sample): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                            <div class="list-group-item px-0">
+                            <div class="list-group-item px-0 border-0">
                                 <div class="d-flex justify-content-between align-items-start">
-                                    <div>
-                                        <h6 class="mb-1">
-                                            <?php echo e($sample->casting->furnace->name ?? 'N/A'); ?> - 
-                                            Döküm #<?php echo e($sample->casting->casting_number); ?>
+                                    <div class="flex-grow-1">
+                                        <div class="d-flex align-items-center mb-1">
+                                            <h6 class="mb-0 me-2">
+                                                <span class="d-none d-sm-inline"><?php echo e($sample->casting->furnace->name ?? 'N/A'); ?> - </span>
+                                                Döküm #<?php echo e($sample->casting->casting_number); ?>
 
-                                        </h6>
+                                            </h6>
+                                        </div>
                                         <p class="mb-1 small">
                                             Prova #<?php echo e($sample->sample_number); ?> - 
                                             <?php echo e($sample->analyzed_by); ?>
@@ -236,7 +306,7 @@
                                         <?php elseif($sample->quality_status === 'pending'): ?> bg-warning
                                         <?php elseif($sample->quality_status === 'needs_adjustment'): ?> bg-info
                                         <?php else: ?> bg-secondary
-                                        <?php endif; ?>">
+                                        <?php endif; ?> ms-2">
                                         <?php if($sample->quality_status === 'approved'): ?> Onaylandı
                                         <?php elseif($sample->quality_status === 'rejected'): ?> Reddedildi
                                         <?php elseif($sample->quality_status === 'pending'): ?> Beklemede
@@ -254,12 +324,13 @@
         </div>
     </div>
     
-    <div class="col-md-6">
+    <div class="col-12 col-lg-6">
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h5 class="mb-0">
                     <i class="fas fa-tools me-2"></i>
-                    Son Ham Madde Eklemeleri
+                    <span class="d-none d-sm-inline">Son Ham Madde Eklemeleri</span>
+                    <span class="d-inline d-sm-none">Ham Madde</span>
                 </h5>
                 <span class="badge bg-info"><?php echo e($dailyStats['total_adjustments']); ?> Bugün</span>
             </div>
@@ -272,16 +343,16 @@
                 <?php else: ?>
                     <div class="list-group list-group-flush">
                         <?php $__currentLoopData = $recentActivities['latest_adjustments']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $adjustment): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                            <div class="list-group-item px-0">
+                            <div class="list-group-item px-0 border-0">
                                 <div class="d-flex justify-content-between align-items-start">
-                                    <div>
+                                    <div class="flex-grow-1">
                                         <h6 class="mb-1">
                                             <?php echo e($adjustment->getMaterialNameTurkish()); ?>
 
                                             <small class="text-muted">(<?php echo e($adjustment->amount_kg); ?> kg)</small>
                                         </h6>
                                         <p class="mb-1 small">
-                                            <?php echo e($adjustment->casting->furnace->name ?? 'N/A'); ?> - 
+                                            <span class="d-none d-sm-inline"><?php echo e($adjustment->casting->furnace->name ?? 'N/A'); ?> - </span>
                                             Döküm #<?php echo e($adjustment->casting->casting_number); ?>
 
                                         </p>
@@ -291,7 +362,7 @@
 
                                         </small>
                                     </div>
-                                    <span class="badge <?php echo e($adjustment->is_successful ? 'bg-success' : 'bg-warning'); ?>">
+                                    <span class="badge <?php echo e($adjustment->is_successful ? 'bg-success' : 'bg-warning'); ?> ms-2">
                                         <?php echo e($adjustment->is_successful ? 'Başarılı' : 'Beklemede'); ?>
 
                                     </span>
@@ -369,9 +440,17 @@ const qualityChart = new Chart(ctx, {
     },
     options: {
         responsive: true,
-        maintainAspectRatio: true,
+        maintainAspectRatio: false,
         plugins: {
             legend: {
+                display: false
+            }
+        },
+        scales: {
+            x: {
+                display: false
+            },
+            y: {
                 display: false
             }
         }
@@ -490,4 +569,4 @@ window.addEventListener('beforeunload', function() {
 </script>
 <?php $__env->stopPush(); ?>
 
-<?php echo $__env->make('layouts.app', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH C:\xampp\htdocs\cansan\kk-cansan\resources\views/dashboard/index.blade.php ENDPATH**/ ?>
+<?php echo $__env->make('layouts.app', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH C:\xampp\htdocs\cansan\resources\views/dashboard/index.blade.php ENDPATH**/ ?>

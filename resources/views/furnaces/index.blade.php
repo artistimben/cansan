@@ -24,42 +24,46 @@
 @section('content')
 <!-- Hızlı İstatistikler -->
 <div class="row mb-4">
-    <div class="col-md-3 mb-3">
-        <div class="card text-center">
-            <div class="card-body">
+    <div class="col-6 col-md-3 mb-3">
+        <div class="card text-center h-100">
+            <div class="card-body d-flex flex-column justify-content-center">
                 <i class="fas fa-fire text-danger fa-2x mb-2"></i>
                 <h4 class="text-danger mb-1">{{ $furnaces->where('status', 'active')->count() }}</h4>
-                <small class="text-muted">Aktif Ocak</small>
+                <small class="text-muted d-none d-sm-block">Aktif Ocak</small>
+                <small class="text-muted d-block d-sm-none">Aktif</small>
             </div>
         </div>
     </div>
     
-    <div class="col-md-3 mb-3">
-        <div class="card text-center">
-            <div class="card-body">
+    <div class="col-6 col-md-3 mb-3">
+        <div class="card text-center h-100">
+            <div class="card-body d-flex flex-column justify-content-center">
                 <i class="fas fa-pause-circle text-warning fa-2x mb-2"></i>
                 <h4 class="text-warning mb-1">{{ $furnaces->where('status', 'idle')->count() }}</h4>
-                <small class="text-muted">Beklemede</small>
+                <small class="text-muted d-none d-sm-block">Beklemede</small>
+                <small class="text-muted d-block d-sm-none">Bekle</small>
             </div>
         </div>
     </div>
     
-    <div class="col-md-3 mb-3">
-        <div class="card text-center">
-            <div class="card-body">
+    <div class="col-6 col-md-3 mb-3">
+        <div class="card text-center h-100">
+            <div class="card-body d-flex flex-column justify-content-center">
                 <i class="fas fa-tools text-info fa-2x mb-2"></i>
                 <h4 class="text-info mb-1">{{ $furnaces->where('status', 'maintenance')->count() }}</h4>
-                <small class="text-muted">Bakımda</small>
+                <small class="text-muted d-none d-sm-block">Bakımda</small>
+                <small class="text-muted d-block d-sm-none">Bakım</small>
             </div>
         </div>
     </div>
     
-    <div class="col-md-3 mb-3">
-        <div class="card text-center">
-            <div class="card-body">
+    <div class="col-6 col-md-3 mb-3">
+        <div class="card text-center h-100">
+            <div class="card-body d-flex flex-column justify-content-center">
                 <i class="fas fa-stop-circle text-secondary fa-2x mb-2"></i>
                 <h4 class="text-secondary mb-1">{{ $furnaces->where('status', 'inactive')->count() }}</h4>
-                <small class="text-muted">Kapalı</small>
+                <small class="text-muted d-none d-sm-block">Kapalı</small>
+                <small class="text-muted d-block d-sm-none">Kapalı</small>
             </div>
         </div>
     </div>
@@ -68,32 +72,43 @@
 <!-- Set Bazlı Ocak Görünümü -->
 <div class="row mb-4">
     @foreach($furnaceSets as $set)
-        <div class="col-md-4 mb-4">
-            <div class="card">
+        <div class="col-12 col-md-4 mb-4">
+            <div class="card h-100">
                 <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
                     <h6 class="mb-0">
                         <i class="fas fa-layer-group me-2"></i>
-                        {{ $set->name }}
+                        <span class="d-none d-sm-inline">{{ $set->name }}</span>
+                        <span class="d-inline d-sm-none">{{ $set->name }}</span>
                     </h6>
                     <span class="badge bg-light text-dark">
-                        {{ $set->furnaces->where('status', 'active')->count() }}/{{ $set->furnaces->count() }} Aktif
+                        {{ $set->furnaces->where('status', 'active')->count() }}/{{ $set->furnaces->count() }} 
+                        <span class="d-none d-sm-inline">Aktif</span>
+                        <span class="d-inline d-sm-none">A</span>
                     </span>
                 </div>
                 <div class="card-body p-2">
                     @foreach($set->furnaces as $furnace)
                         <div class="d-flex justify-content-between align-items-center p-2 mb-2 border rounded">
-                            <div>
-                                <strong>{{ $furnace->name }}</strong>
-                                <br><small class="text-muted">Kapasite: {{ $furnace->capacity ?? 'N/A' }} ton</small>
-                                <br><small class="text-info">
+                            <div class="flex-grow-1">
+                                <div class="d-flex align-items-center mb-1">
+                                    <strong>{{ $furnace->name }}</strong>
+                                </div>
+                                <div class="small text-muted d-none d-sm-block">
+                                    Kapasite: {{ $furnace->capacity ?? 'N/A' }} ton
+                                </div>
+                                <div class="small text-muted d-block d-sm-none">
+                                    {{ $furnace->capacity ?? 'N/A' }}t
+                                </div>
+                                <div class="small text-info">
                                     <i class="fas fa-fire"></i> 
-                                    {{ $furnace->castings->count() }} döküm 
+                                    {{ $furnace->castings->count() }} döküm
                                     @if($furnace->castings->count() > 0)
-                                        (Sıradaki: {{ $furnace->castings->count() + 1 }}.)
+                                        <span class="d-none d-sm-inline">(Sıradaki: {{ $furnace->castings->count() + 1 }}.)</span>
+                                        <span class="d-inline d-sm-none">({{ $furnace->castings->count() + 1 }})</span>
                                     @endif
-                                </small>
+                                </div>
                             </div>
-                            <div class="text-end">
+                            <div class="text-end ms-2">
                                 <span class="badge 
                                     @if($furnace->status === 'active') bg-success
                                     @elseif($furnace->status === 'idle') bg-warning
@@ -107,10 +122,10 @@
                                     @endif
                                 </span>
                                 @if($furnace->status === 'active')
-                                    <br><small class="text-success">
+                                    <div class="small text-success mt-1">
                                         <i class="fas fa-fire"></i>
                                         {{ $furnace->current_temperature ?? 'N/A' }}°C
-                                    </small>
+                                    </div>
                                 @endif
                             </div>
                         </div>
@@ -132,9 +147,10 @@
                 </h5>
                 <small class="text-muted">{{ $furnaces->count() }} ocak</small>
             </div>
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-hover">
+            <div class="card-body p-0">
+                <!-- Desktop Table -->
+                <div class="table-responsive d-none d-lg-block">
+                    <table class="table table-hover mb-0">
                         <thead>
                             <tr>
                                 <th>Ocak</th>
@@ -253,6 +269,99 @@
                             @endforeach
                         </tbody>
                     </table>
+                </div>
+                
+                <!-- Mobile Card View -->
+                <div class="d-block d-lg-none p-3">
+                    @foreach($furnaces as $furnace)
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <h6 class="card-title mb-0">
+                                        <strong>{{ $furnace->name }}</strong>
+                                        <br><small class="text-muted">{{ $furnace->furnaceSet->name }}</small>
+                                    </h6>
+                                    <span class="badge 
+                                        @if($furnace->status === 'active') bg-success
+                                        @elseif($furnace->status === 'idle') bg-warning
+                                        @elseif($furnace->status === 'maintenance') bg-info
+                                        @else bg-secondary
+                                        @endif">
+                                        @if($furnace->status === 'active') Aktif
+                                        @elseif($furnace->status === 'idle') Beklemede
+                                        @elseif($furnace->status === 'maintenance') Bakımda
+                                        @else Kapalı
+                                        @endif
+                                    </span>
+                                </div>
+                                
+                                <div class="row mb-2">
+                                    <div class="col-6">
+                                        <small class="text-muted">Kapasite:</small>
+                                        <div>{{ $furnace->capacity ?? 'N/A' }} ton</div>
+                                    </div>
+                                    <div class="col-6">
+                                        <small class="text-muted">Sıcaklık:</small>
+                                        <div>
+                                            @if($furnace->current_temperature && $furnace->status === 'active')
+                                                <span class="text-danger">
+                                                    <i class="fas fa-thermometer-half"></i>
+                                                    {{ $furnace->current_temperature }}°C
+                                                </span>
+                                            @else
+                                                <span class="text-muted">-</span>
+                                            @endif
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="row mb-2">
+                                    <div class="col-6">
+                                        <small class="text-muted">Son Döküm:</small>
+                                        <div>
+                                            @if($furnace->castings->count() > 0)
+                                                @php $lastCasting = $furnace->castings->first(); @endphp
+                                                <strong>#{{ $lastCasting->casting_number }}</strong>
+                                                <br><small class="text-muted">{{ $lastCasting->casting_date->format('d.m.Y H:i') }}</small>
+                                            @else
+                                                <span class="text-muted">Döküm yok</span>
+                                            @endif
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <small class="text-muted">Aktif Döküm:</small>
+                                        <div>
+                                            @php $activeCasting = $furnace->castings->where('status', 'active')->first(); @endphp
+                                            @if($activeCasting)
+                                                <span class="badge bg-success">#{{ $activeCasting->casting_number }}</span>
+                                                <br><small class="text-muted">{{ $activeCasting->shift }} Vardiyası</small>
+                                            @else
+                                                <span class="text-muted">Aktif döküm yok</span>
+                                            @endif
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="d-flex gap-2">
+                                    <a href="{{ route('furnaces.show', $furnace) }}" class="btn btn-sm btn-outline-info flex-fill">
+                                        <i class="fas fa-eye"></i> Detay
+                                    </a>
+                                    <a href="{{ route('furnaces.edit', $furnace) }}" class="btn btn-sm btn-outline-primary flex-fill">
+                                        <i class="fas fa-edit"></i> Düzenle
+                                    </a>
+                                    @if($furnace->status !== 'active')
+                                        <button type="button" class="btn btn-sm btn-outline-success" onclick="updateFurnaceStatus({{ $furnace->id }}, 'active')" title="Aktif Yap">
+                                            <i class="fas fa-play"></i>
+                                        </button>
+                                    @else
+                                        <button type="button" class="btn btn-sm btn-outline-warning" onclick="updateFurnaceStatus({{ $furnace->id }}, 'idle')" title="Bekletmeye Al">
+                                            <i class="fas fa-pause"></i>
+                                        </button>
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
                 </div>
             </div>
         </div>

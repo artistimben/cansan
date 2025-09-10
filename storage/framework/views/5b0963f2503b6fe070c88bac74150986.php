@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'Cansan Kalite Kontrol Sistemi')</title>
+    <meta name="csrf-token" content="<?php echo e(csrf_token()); ?>">
+    <title><?php echo $__env->yieldContent('title', 'Cansan Kalite Kontrol Sistemi'); ?></title>
     
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -14,7 +14,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     
-    @stack('styles')
+    <?php echo $__env->yieldPushContent('styles'); ?>
 </head>
 <body>
     <!-- Navigation -->
@@ -27,7 +27,7 @@
             </button>
             
             <!-- Brand -->
-            <a class="navbar-brand fw-bold" href="{{ route('dashboard') }}">
+            <a class="navbar-brand fw-bold" href="<?php echo e(route('dashboard')); ?>">
                 <i class="fas fa-industry me-2"></i>
                 <span class="d-none d-md-inline">Cansan Kalite Kontrol</span>
                 <span class="d-inline d-md-none">Cansan</span>
@@ -63,8 +63,8 @@
                 <div class="position-sticky pt-3">
                     <ul class="nav flex-column">
                         <li class="nav-item">
-                            <a class="nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}" 
-                               href="{{ route('dashboard') }}">
+                            <a class="nav-link <?php echo e(request()->routeIs('dashboard') ? 'active' : ''); ?>" 
+                               href="<?php echo e(route('dashboard')); ?>">
                                 <i class="fas fa-tachometer-alt me-2"></i>
                                 Kontrol Paneli
                             </a>
@@ -76,23 +76,23 @@
                                 </h6>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link {{ request()->routeIs('furnaces.*') ? 'active' : '' }}" 
-                               href="{{ route('furnaces.index') }}">
+                            <a class="nav-link <?php echo e(request()->routeIs('furnaces.*') ? 'active' : ''); ?>" 
+                               href="<?php echo e(route('furnaces.index')); ?>">
                                 <i class="fas fa-fire me-2"></i>
                                 Ocaklar
                                     <span class="badge bg-success ms-auto">3</span>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link {{ request()->routeIs('castings.*') ? 'active' : '' }}" 
-                               href="{{ route('castings.index') }}">
+                            <a class="nav-link <?php echo e(request()->routeIs('castings.*') ? 'active' : ''); ?>" 
+                               href="<?php echo e(route('castings.index')); ?>">
                                     <i class="fas fa-industry me-2"></i>
                                 Dökümler
                             </a>
                         </li>
                             <li class="nav-item">
-                                <a class="nav-link {{ request()->routeIs('furnace-management.*') ? 'active' : '' }}" 
-                                   href="{{ route('furnace-management.index') }}">
+                                <a class="nav-link <?php echo e(request()->routeIs('furnace-management.*') ? 'active' : ''); ?>" 
+                                   href="<?php echo e(route('furnace-management.index')); ?>">
                                     <i class="fas fa-cogs me-2"></i>
                                     Ocak Yönetimi
                                 </a>
@@ -104,15 +104,15 @@
                                 </h6>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link {{ request()->routeIs('samples.*') ? 'active' : '' }}" 
-                               href="{{ route('samples.index') }}">
+                            <a class="nav-link <?php echo e(request()->routeIs('samples.*') ? 'active' : ''); ?>" 
+                               href="<?php echo e(route('samples.index')); ?>">
                                 <i class="fas fa-vial me-2"></i>
                                 Provalar
                             </a>
                         </li>
                             <li class="nav-item">
-                                <a class="nav-link {{ request()->routeIs('samples.pending') ? 'active' : '' }}" 
-                                   href="{{ route('samples.pending') }}">
+                                <a class="nav-link <?php echo e(request()->routeIs('samples.pending') ? 'active' : ''); ?>" 
+                                   href="<?php echo e(route('samples.pending')); ?>">
                                     <i class="fas fa-hourglass-half me-2"></i>
                                     Bekleyen Provalar
                                     <span class="badge bg-warning ms-auto" id="pending-count">0</span>
@@ -125,15 +125,15 @@
                                 </h6>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link {{ request()->routeIs('reports.*') ? 'active' : '' }}" 
-                               href="{{ route('reports.index') }}">
+                            <a class="nav-link <?php echo e(request()->routeIs('reports.*') ? 'active' : ''); ?>" 
+                               href="<?php echo e(route('reports.index')); ?>">
                                 <i class="fas fa-chart-bar me-2"></i>
                                     Genel Raporlar
                             </a>
                         </li>
                         <li class="nav-item">
-                                <a class="nav-link {{ request()->routeIs('furnace-reports.*') ? 'active' : '' }}" 
-                                   href="{{ route('furnace-reports.index') }}">
+                                <a class="nav-link <?php echo e(request()->routeIs('furnace-reports.*') ? 'active' : ''); ?>" 
+                                   href="<?php echo e(route('furnace-reports.index')); ?>">
                                 <i class="fas fa-chart-line me-2"></i>
                                 Ocak Raporları
                             </a>
@@ -145,40 +145,43 @@
                 <!-- Main content for desktop -->
                 <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
                 <!-- Alerts -->
-                @if(session('success'))
+                <?php if(session('success')): ?>
                     <div class="alert alert-success alert-dismissible fade show mt-3" role="alert">
                         <i class="fas fa-check-circle me-2"></i>
-                        {{ session('success') }}
+                        <?php echo e(session('success')); ?>
+
                         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                     </div>
-                @endif
+                <?php endif; ?>
 
-                @if(session('error'))
+                <?php if(session('error')): ?>
                     <div class="alert alert-danger alert-dismissible fade show mt-3" role="alert">
                         <i class="fas fa-exclamation-circle me-2"></i>
-                        {{ session('error') }}
+                        <?php echo e(session('error')); ?>
+
                         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                     </div>
-                @endif
+                <?php endif; ?>
 
-                @if(session('warning'))
+                <?php if(session('warning')): ?>
                     <div class="alert alert-warning alert-dismissible fade show mt-3" role="alert">
                         <i class="fas fa-exclamation-triangle me-2"></i>
-                        {{ session('warning') }}
+                        <?php echo e(session('warning')); ?>
+
                         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                     </div>
-                @endif
+                <?php endif; ?>
 
                 <!-- Page Header -->
                     <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                    <h1 class="h2">@yield('header', 'Sayfa')</h1>
+                    <h1 class="h2"><?php echo $__env->yieldContent('header', 'Sayfa'); ?></h1>
                     <div class="btn-toolbar mb-2 mb-md-0">
-                        @yield('header-buttons')
+                        <?php echo $__env->yieldContent('header-buttons'); ?>
                     </div>
                 </div>
 
                 <!-- Page Content -->
-                @yield('content')
+                <?php echo $__env->yieldContent('content'); ?>
             </main>
             </div>
         </div>
@@ -195,8 +198,8 @@
         <div class="offcanvas-body">
             <ul class="nav flex-column">
                         <li class="nav-item">
-                    <a class="nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}" 
-                       href="{{ route('dashboard') }}">
+                    <a class="nav-link <?php echo e(request()->routeIs('dashboard') ? 'active' : ''); ?>" 
+                       href="<?php echo e(route('dashboard')); ?>">
                         <i class="fas fa-tachometer-alt me-2"></i>
                         Kontrol Paneli
                             </a>
@@ -206,23 +209,23 @@
                     <h6 class="sidebar-heading px-3 mt-4 mb-1 text-muted">Üretim Yönetimi</h6>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link {{ request()->routeIs('furnaces.*') ? 'active' : '' }}" 
-                       href="{{ route('furnaces.index') }}">
+                    <a class="nav-link <?php echo e(request()->routeIs('furnaces.*') ? 'active' : ''); ?>" 
+                       href="<?php echo e(route('furnaces.index')); ?>">
                         <i class="fas fa-fire me-2"></i>
                         Ocaklar
                         <span class="badge bg-success ms-auto">3</span>
                             </a>
                         </li>
                         <li class="nav-item">
-                    <a class="nav-link {{ request()->routeIs('castings.*') ? 'active' : '' }}" 
-                       href="{{ route('castings.index') }}">
+                    <a class="nav-link <?php echo e(request()->routeIs('castings.*') ? 'active' : ''); ?>" 
+                       href="<?php echo e(route('castings.index')); ?>">
                         <i class="fas fa-industry me-2"></i>
                         Dökümler
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link {{ request()->routeIs('furnace-management.*') ? 'active' : '' }}" 
-                       href="{{ route('furnace-management.index') }}">
+                    <a class="nav-link <?php echo e(request()->routeIs('furnace-management.*') ? 'active' : ''); ?>" 
+                       href="<?php echo e(route('furnace-management.index')); ?>">
                                 <i class="fas fa-cogs me-2"></i>
                                 Ocak Yönetimi
                             </a>
@@ -232,15 +235,15 @@
                     <h6 class="sidebar-heading px-3 mt-4 mb-1 text-muted">Kalite Kontrol</h6>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link {{ request()->routeIs('samples.*') ? 'active' : '' }}" 
-                       href="{{ route('samples.index') }}">
+                    <a class="nav-link <?php echo e(request()->routeIs('samples.*') ? 'active' : ''); ?>" 
+                       href="<?php echo e(route('samples.index')); ?>">
                         <i class="fas fa-vial me-2"></i>
                         Provalar
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link {{ request()->routeIs('samples.pending') ? 'active' : '' }}" 
-                       href="{{ route('samples.pending') }}">
+                    <a class="nav-link <?php echo e(request()->routeIs('samples.pending') ? 'active' : ''); ?>" 
+                       href="<?php echo e(route('samples.pending')); ?>">
                         <i class="fas fa-hourglass-half me-2"></i>
                         Bekleyen Provalar
                         <span class="badge bg-warning ms-auto" id="pending-count-mobile">0</span>
@@ -251,15 +254,15 @@
                     <h6 class="sidebar-heading px-3 mt-4 mb-1 text-muted">Raporlar</h6>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link {{ request()->routeIs('reports.*') ? 'active' : '' }}" 
-                       href="{{ route('reports.index') }}">
+                    <a class="nav-link <?php echo e(request()->routeIs('reports.*') ? 'active' : ''); ?>" 
+                       href="<?php echo e(route('reports.index')); ?>">
                         <i class="fas fa-chart-bar me-2"></i>
                         Genel Raporlar
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link {{ request()->routeIs('furnace-reports.*') ? 'active' : '' }}" 
-                       href="{{ route('furnace-reports.index') }}">
+                    <a class="nav-link <?php echo e(request()->routeIs('furnace-reports.*') ? 'active' : ''); ?>" 
+                       href="<?php echo e(route('furnace-reports.index')); ?>">
                                 <i class="fas fa-chart-line me-2"></i>
                                 Ocak Raporları
                             </a>
@@ -269,13 +272,13 @@
                     <h6 class="sidebar-heading px-3 mt-4 mb-1 text-muted">Hızlı İşlemler</h6>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ route('castings.create') }}">
+                    <a class="nav-link" href="<?php echo e(route('castings.create')); ?>">
                         <i class="fas fa-plus-circle me-2"></i>
                         Yeni Döküm
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ route('samples.create') }}">
+                    <a class="nav-link" href="<?php echo e(route('samples.create')); ?>">
                         <i class="fas fa-plus me-2"></i>
                         Yeni Prova
                     </a>
@@ -288,40 +291,43 @@
     <div class="d-lg-none">
         <div class="container-fluid p-3">
             <!-- Alerts -->
-            @if(session('success'))
+            <?php if(session('success')): ?>
                 <div class="alert alert-success alert-dismissible fade show" role="alert">
                     <i class="fas fa-check-circle me-2"></i>
-                    {{ session('success') }}
+                    <?php echo e(session('success')); ?>
+
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
-            @endif
+            <?php endif; ?>
 
-            @if(session('error'))
+            <?php if(session('error')): ?>
                 <div class="alert alert-danger alert-dismissible fade show" role="alert">
                     <i class="fas fa-exclamation-circle me-2"></i>
-                    {{ session('error') }}
+                    <?php echo e(session('error')); ?>
+
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
-            @endif
+            <?php endif; ?>
 
-            @if(session('warning'))
+            <?php if(session('warning')): ?>
                 <div class="alert alert-warning alert-dismissible fade show" role="alert">
                     <i class="fas fa-exclamation-triangle me-2"></i>
-                    {{ session('warning') }}
+                    <?php echo e(session('warning')); ?>
+
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
-            @endif
+            <?php endif; ?>
 
             <!-- Mobile Page Header -->
             <div class="d-flex justify-content-between flex-wrap align-items-center pb-2 mb-3 border-bottom">
-                <h1 class="h4">@yield('header', 'Sayfa')</h1>
+                <h1 class="h4"><?php echo $__env->yieldContent('header', 'Sayfa'); ?></h1>
                 <div class="btn-toolbar">
-                    @yield('header-buttons')
+                    <?php echo $__env->yieldContent('header-buttons'); ?>
                 </div>
             </div>
 
             <!-- Mobile Page Content -->
-            @yield('content')
+            <?php echo $__env->yieldContent('content'); ?>
         </div>
     </div>
 
@@ -361,6 +367,7 @@
         });
     </script>
     
-    @stack('scripts')
+    <?php echo $__env->yieldPushContent('scripts'); ?>
 </body>
 </html>
+<?php /**PATH C:\xampp\htdocs\cansan\resources\views/layouts/app.blade.php ENDPATH**/ ?>

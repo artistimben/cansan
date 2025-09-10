@@ -5,7 +5,7 @@
 @section('header', 'Prova Yönetimi')
 
 @section('header-buttons')
-    <div class="btn-group" role="group">
+    <div class="btn-group d-none d-md-flex" role="group">
         <a href="{{ route('samples.create') }}" class="btn btn-primary btn-sm">
             <i class="fas fa-plus me-1"></i>
             Yeni Prova
@@ -23,47 +23,64 @@
             Export
         </button>
     </div>
+    
+    <!-- Mobile buttons -->
+    <div class="d-flex d-md-none gap-2">
+        <a href="{{ route('samples.create') }}" class="btn btn-primary btn-sm">
+            <i class="fas fa-plus"></i>
+        </a>
+        <a href="{{ route('samples.pending') }}" class="btn btn-warning btn-sm">
+            <i class="fas fa-hourglass-half"></i>
+        </a>
+        <button type="button" class="btn btn-outline-info btn-sm" data-bs-toggle="modal" data-bs-target="#filterModal">
+            <i class="fas fa-filter"></i>
+        </button>
+    </div>
 @endsection
 
 @section('content')
 <!-- Hızlı İstatistikler -->
 <div class="row mb-4">
-    <div class="col-md-3 mb-3">
+    <div class="col-6 col-md-3 mb-3">
         <div class="card text-center">
             <div class="card-body">
                 <i class="fas fa-vial text-primary fa-2x mb-2"></i>
                 <h4 class="text-primary mb-1">{{ $samples->total() }}</h4>
-                <small class="text-muted">Toplam Prova</small>
+                <small class="text-muted d-none d-sm-block">Toplam Prova</small>
+                <small class="text-muted d-block d-sm-none">Toplam</small>
             </div>
         </div>
     </div>
     
-    <div class="col-md-3 mb-3">
+    <div class="col-6 col-md-3 mb-3">
         <div class="card text-center">
             <div class="card-body">
                 <i class="fas fa-check-circle text-success fa-2x mb-2"></i>
                 <h4 class="text-success mb-1">{{ $samples->where('quality_status', 'approved')->count() }}</h4>
-                <small class="text-muted">Onaylanan</small>
+                <small class="text-muted d-none d-sm-block">Onaylanan</small>
+                <small class="text-muted d-block d-sm-none">Onay</small>
             </div>
         </div>
     </div>
     
-    <div class="col-md-3 mb-3">
+    <div class="col-6 col-md-3 mb-3">
         <div class="card text-center">
             <div class="card-body">
                 <i class="fas fa-hourglass-half text-warning fa-2x mb-2"></i>
                 <h4 class="text-warning mb-1">{{ $samples->where('quality_status', 'pending')->count() }}</h4>
-                <small class="text-muted">Bekleyen</small>
+                <small class="text-muted d-none d-sm-block">Bekleyen</small>
+                <small class="text-muted d-block d-sm-none">Bekle</small>
             </div>
         </div>
     </div>
     
-    <div class="col-md-3 mb-3">
+    <div class="col-6 col-md-3 mb-3">
         <div class="card text-center">
             <div class="card-body">
                 <i class="fas fa-times-circle text-danger fa-2x mb-2"></i>
                 <h4 class="text-danger mb-1">{{ $samples->where('quality_status', 'rejected')->count() }}</h4>
-                <small class="text-muted">Reddedilen</small>
+                <small class="text-muted d-none d-sm-block">Reddedilen</small>
+                <small class="text-muted d-block d-sm-none">Red</small>
             </div>
         </div>
     </div>
@@ -109,7 +126,8 @@
             </div>
             <div class="card-body">
                 @if($samples->count() > 0)
-                    <div class="table-responsive">
+                    <!-- Desktop Table -->
+                    <div class="table-responsive d-none d-lg-block">
                         <table class="table table-hover">
                             <thead>
                                 <tr>
@@ -198,6 +216,107 @@
                                 @endforeach
                             </tbody>
                         </table>
+                    </div>
+                    
+                    <!-- Mobile Card View -->
+                    <div class="d-block d-lg-none">
+                        @foreach($samples as $sample)
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <h6 class="card-title mb-0">
+                                            <strong>#{{ $sample->sample_number }}</strong>
+                                            @if($sample->sample_type !== 'regular')
+                                                <br><small class="text-muted">{{ ucfirst($sample->sample_type) }}</small>
+                                            @endif
+                                        </h6>
+                                        <span class="badge 
+                                            @if($sample->quality_status === 'approved') bg-success
+                                            @elseif($sample->quality_status === 'rejected') bg-danger
+                                            @elseif($sample->quality_status === 'pending') bg-warning
+                                            @elseif($sample->quality_status === 'needs_adjustment') bg-info
+                                            @else bg-secondary
+                                            @endif">
+                                            @if($sample->quality_status === 'approved') Onaylandı
+                                            @elseif($sample->quality_status === 'rejected') Reddedildi
+                                            @elseif($sample->quality_status === 'pending') Beklemede
+                                            @elseif($sample->quality_status === 'needs_adjustment') Düzeltme Gerekli
+                                            @else {{ $sample->quality_status }}
+                                            @endif
+                                        </span>
+                                    </div>
+                                    
+                                    <div class="row mb-2">
+                                        <div class="col-6">
+                                            <small class="text-muted">Ocak:</small>
+                                            <div>
+                                                <span class="badge bg-primary">
+                                                    {{ $sample->casting->furnace->name ?? 'N/A' }}
+                                                </span>
+                                                <br><small class="text-muted">{{ $sample->casting->furnace->furnaceSet->name ?? 'N/A' }}</small>
+                                            </div>
+                                        </div>
+                                        <div class="col-6">
+                                            <small class="text-muted">Döküm:</small>
+                                            <div>
+                                                <strong>#{{ $sample->casting->casting_number }}</strong>
+                                                <br><small class="text-muted">{{ $sample->casting->shift ?? 'N/A' }} Vardiyası</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="row mb-2">
+                                        <div class="col-6">
+                                            <small class="text-muted">Tarih:</small>
+                                            <div>
+                                                {{ $sample->sample_time->format('d.m.Y') }}
+                                                <br><small class="text-muted">{{ $sample->sample_time->format('H:i') }}</small>
+                                            </div>
+                                        </div>
+                                        <div class="col-6">
+                                            <small class="text-muted">Analiz Eden:</small>
+                                            <div>{{ $sample->analyzed_by }}</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="row mb-3">
+                                        <div class="col-6">
+                                            <small class="text-muted">Telsiz:</small>
+                                            <div>
+                                                @if($sample->reported_via_radio)
+                                                    <i class="fas fa-radio text-success" title="Telsizle bildirildi"></i>
+                                                    <br><small class="text-muted">{{ $sample->reported_at->format('H:i') }}</small>
+                                                @else
+                                                    <i class="fas fa-radio text-muted" title="Telsizle bildirilmedi"></i>
+                                                @endif
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="d-flex gap-2">
+                                        <a href="{{ route('samples.show', $sample) }}" class="btn btn-sm btn-outline-info flex-fill">
+                                            <i class="fas fa-eye"></i> Detay
+                                        </a>
+                                        <a href="{{ route('samples.edit', $sample) }}" class="btn btn-sm btn-outline-primary flex-fill">
+                                            <i class="fas fa-edit"></i> Düzenle
+                                        </a>
+                                        @if($sample->quality_status === 'pending')
+                                            <button type="button" class="btn btn-sm btn-outline-success" onclick="updateQualityStatus({{ $sample->id }}, 'approved')" title="Onayla">
+                                                <i class="fas fa-check"></i>
+                                            </button>
+                                            <button type="button" class="btn btn-sm btn-outline-danger" onclick="updateQualityStatus({{ $sample->id }}, 'rejected')" title="Reddet">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+                                        @endif
+                                        @if(!$sample->reported_via_radio)
+                                            <button type="button" class="btn btn-sm btn-outline-warning" onclick="recordRadioReport({{ $sample->id }})" title="Telsiz Bildirimi">
+                                                <i class="fas fa-radio"></i>
+                                            </button>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach
                     </div>
                     
                     <!-- Pagination -->

@@ -5,7 +5,7 @@
 @section('header', 'Kontrol Paneli')
 
 @section('header-buttons')
-    <div class="btn-group" role="group">
+    <div class="btn-group d-none d-md-flex" role="group">
         <a href="{{ route('castings.create') }}" class="btn btn-success btn-sm" onclick="console.log('Yeni Döküm butonu tıklandı')">
             <i class="fas fa-plus-circle me-1"></i>
             Yeni Döküm
@@ -23,58 +23,91 @@
             <span id="auto-refresh-text">Otomatik Yenileme</span>
         </button>
     </div>
+    
+    <!-- Mobile buttons -->
+    <div class="d-flex d-md-none gap-2">
+        <a href="{{ route('castings.create') }}" class="btn btn-success btn-sm">
+            <i class="fas fa-plus-circle"></i>
+        </a>
+        <a href="{{ route('samples.create') }}" class="btn btn-primary btn-sm">
+            <i class="fas fa-plus"></i>
+        </a>
+        <button type="button" class="btn btn-outline-primary btn-sm" onclick="refreshDashboard()">
+            <i class="fas fa-sync-alt"></i>
+        </button>
+    </div>
 @endsection
 
 @section('content')
 <!-- Sistem Durumu Kartları -->
 <div class="row mb-4">
-    <div class="col-md-3 mb-3">
-        <div class="card stat-card">
-            <div class="card-body text-center">
+    <div class="col-6 col-md-3 mb-3">
+        <div class="card stat-card h-100">
+            <div class="card-body text-center d-flex flex-column justify-content-center">
                 <div class="stat-number" id="total-castings">{{ $dailyStats['total_castings'] }}</div>
-                <div class="text-muted">Bugünkü Döküm</div>
-                <small class="text-success">
+                <div class="text-muted d-none d-sm-block">Bugünkü Döküm</div>
+                <div class="text-muted d-block d-sm-none">Döküm</div>
+                <small class="text-success d-none d-md-block">
                     <i class="fas fa-arrow-up me-1"></i>
                     Aktif Ocak: {{ $dailyStats['active_furnaces'] }}
                 </small>
+                <small class="text-success d-block d-md-none">
+                    <i class="fas fa-fire me-1"></i>
+                    {{ $dailyStats['active_furnaces'] }} Ocak
+                </small>
             </div>
         </div>
     </div>
     
-    <div class="col-md-3 mb-3">
-        <div class="card stat-card">
-            <div class="card-body text-center">
+    <div class="col-6 col-md-3 mb-3">
+        <div class="card stat-card h-100">
+            <div class="card-body text-center d-flex flex-column justify-content-center">
                 <div class="stat-number" id="total-samples">{{ $dailyStats['total_samples'] }}</div>
-                <div class="text-muted">Bugünkü Prova</div>
-                <small class="text-info">
+                <div class="text-muted d-none d-sm-block">Bugünkü Prova</div>
+                <div class="text-muted d-block d-sm-none">Prova</div>
+                <small class="text-info d-none d-md-block">
                     <i class="fas fa-vial me-1"></i>
                     Haftalık: {{ $weeklyStats['total_samples'] }}
                 </small>
-            </div>
-        </div>
-    </div>
-    
-    <div class="col-md-3 mb-3">
-        <div class="card stat-card">
-            <div class="card-body text-center">
-                <div class="stat-number text-success" id="approved-samples">{{ $dailyStats['approved_samples'] }}</div>
-                <div class="text-muted">Onaylanan Prova</div>
-                <small class="text-warning">
-                    <i class="fas fa-hourglass-half me-1"></i>
-                    Bekleyen: {{ $dailyStats['pending_samples'] }}
+                <small class="text-info d-block d-md-none">
+                    <i class="fas fa-vial me-1"></i>
+                    Hafta: {{ $weeklyStats['total_samples'] }}
                 </small>
             </div>
         </div>
     </div>
     
-    <div class="col-md-3 mb-3">
-        <div class="card stat-card">
-            <div class="card-body text-center">
+    <div class="col-6 col-md-3 mb-3">
+        <div class="card stat-card h-100">
+            <div class="card-body text-center d-flex flex-column justify-content-center">
+                <div class="stat-number text-success" id="approved-samples">{{ $dailyStats['approved_samples'] }}</div>
+                <div class="text-muted d-none d-sm-block">Onaylanan Prova</div>
+                <div class="text-muted d-block d-sm-none">Onay</div>
+                <small class="text-warning d-none d-md-block">
+                    <i class="fas fa-hourglass-half me-1"></i>
+                    Bekleyen: {{ $dailyStats['pending_samples'] }}
+                </small>
+                <small class="text-warning d-block d-md-none">
+                    <i class="fas fa-clock me-1"></i>
+                    Bekle: {{ $dailyStats['pending_samples'] }}
+                </small>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-6 col-md-3 mb-3">
+        <div class="card stat-card h-100">
+            <div class="card-body text-center d-flex flex-column justify-content-center">
                 <div class="stat-number text-primary" id="quality-rate">{{ $weeklyStats['quality_rate'] }}%</div>
-                <div class="text-muted">Kalite Oranı</div>
-                <small class="text-danger">
+                <div class="text-muted d-none d-sm-block">Kalite Oranı</div>
+                <div class="text-muted d-block d-sm-none">Kalite</div>
+                <small class="text-danger d-none d-md-block">
                     <i class="fas fa-times-circle me-1"></i>
                     Reddedilen: {{ $dailyStats['rejected_samples'] }}
+                </small>
+                <small class="text-danger d-block d-md-none">
+                    <i class="fas fa-times me-1"></i>
+                    Red: {{ $dailyStats['rejected_samples'] }}
                 </small>
             </div>
         </div>
@@ -83,14 +116,15 @@
 
 <!-- Ocak Durumu ve Aktif Dökümler -->
 <div class="row mb-4">
-    <div class="col-md-8">
+    <div class="col-12 col-lg-8 mb-4 mb-lg-0">
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h5 class="mb-0">
                     <i class="fas fa-fire me-2"></i>
-                    Ocak Durumu ve Aktif Dökümler
+                    <span class="d-none d-sm-inline">Ocak Durumu ve Aktif Dökümler</span>
+                    <span class="d-inline d-sm-none">Ocaklar</span>
                 </h5>
-                <span class="badge bg-success">{{ count($activeFurnaces) }} Aktif Ocak</span>
+                <span class="badge bg-success">{{ count($activeFurnaces) }} Aktif</span>
             </div>
             <div class="card-body">
                 @if(empty($setStats))
@@ -101,24 +135,45 @@
                 @else
                     <div class="row">
                         @foreach($setStats as $setStat)
-                            <div class="col-md-4 mb-3">
-                                <div class="card border-0 bg-light">
-                                    <div class="card-body">
+                            <div class="col-12 col-sm-6 col-lg-4 mb-3">
+                                <div class="card border-0 bg-light h-100">
+                                    <div class="card-body d-flex flex-column">
                                         <div class="d-flex align-items-center mb-2">
                                             <span class="furnace-status {{ $setStat['active_furnace'] ? 'furnace-active' : 'furnace-inactive' }}"></span>
-                                            <h6 class="mb-0">{{ $setStat['set']->name }}</h6>
+                                            <h6 class="mb-0 flex-grow-1">{{ $setStat['set']->name }}</h6>
                                         </div>
                                         
                                         @if($setStat['active_furnace'])
-                                            <p class="mb-1">
-                                                <strong>{{ $setStat['active_furnace']->name }}</strong>
-                                                <span class="badge bg-success badge-sm ms-1">Aktif</span>
-                                            </p>
+                                            <div class="mb-2">
+                                                <div class="d-flex align-items-center justify-content-between">
+                                                    <strong class="text-primary">{{ $setStat['active_furnace']->name }}</strong>
+                                                    <span class="badge bg-success badge-sm">Aktif</span>
+                                                </div>
+                                            </div>
                                             
-                                            <div class="small text-muted">
-                                                <div>Günlük: {{ $setStat['daily_castings'] }} döküm</div>
-                                                <div>Haftalık: {{ $setStat['weekly_castings'] }} döküm</div>
-                                                <div>Aylık: {{ $setStat['monthly_castings'] }} döküm</div>
+                                            <div class="small text-muted d-none d-md-block mb-2">
+                                                <div class="row">
+                                                    <div class="col-4 text-center">
+                                                        <div class="fw-bold">{{ $setStat['daily_castings'] }}</div>
+                                                        <div>Günlük</div>
+                                                    </div>
+                                                    <div class="col-4 text-center">
+                                                        <div class="fw-bold">{{ $setStat['weekly_castings'] }}</div>
+                                                        <div>Haftalık</div>
+                                                    </div>
+                                                    <div class="col-4 text-center">
+                                                        <div class="fw-bold">{{ $setStat['monthly_castings'] }}</div>
+                                                        <div>Aylık</div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="small text-muted d-block d-md-none mb-2">
+                                                <div class="d-flex justify-content-between">
+                                                    <span>Gün: <strong>{{ $setStat['daily_castings'] }}</strong></span>
+                                                    <span>Hafta: <strong>{{ $setStat['weekly_castings'] }}</strong></span>
+                                                    <span>Ay: <strong>{{ $setStat['monthly_castings'] }}</strong></span>
+                                                </div>
                                             </div>
                                             
                                             @php
@@ -126,20 +181,25 @@
                                             @endphp
                                             
                                             @if($activeCasting)
-                                                <div class="mt-2 p-2 bg-white rounded">
+                                                <div class="mt-auto p-2 bg-white rounded">
                                                     <div class="small">
-                                                        <strong>Döküm #{{ $activeCasting->casting_number }}</strong>
-                                                        <div>Prova: {{ $activeCasting->samples->count() }} adet</div>
-                                                        <div>Durum: 
+                                                        <div class="d-flex justify-content-between align-items-center mb-1">
+                                                            <strong>Döküm #{{ $activeCasting->casting_number }}</strong>
                                                             <span class="badge {{ $activeCasting->getQualityStatus() === 'approved' ? 'bg-success' : ($activeCasting->getQualityStatus() === 'rejected' ? 'bg-danger' : 'bg-warning') }}">
                                                                 {{ ucfirst($activeCasting->getQualityStatus()) }}
                                                             </span>
                                                         </div>
+                                                        <div class="text-muted">Prova: {{ $activeCasting->samples->count() }} adet</div>
                                                     </div>
                                                 </div>
                                             @endif
                                         @else
-                                            <p class="text-muted mb-0">Aktif ocak yok</p>
+                                            <div class="mt-auto">
+                                                <p class="text-muted mb-0 text-center">
+                                                    <i class="fas fa-power-off me-1"></i>
+                                                    Aktif ocak yok
+                                                </p>
+                                            </div>
                                         @endif
                                     </div>
                                 </div>
@@ -151,16 +211,19 @@
         </div>
     </div>
     
-    <div class="col-md-4">
+    <div class="col-12 col-lg-4">
         <div class="card">
             <div class="card-header">
                 <h5 class="mb-0">
                     <i class="fas fa-chart-pie me-2"></i>
-                    Günlük Kalite Dağılımı
+                    <span class="d-none d-sm-inline">Günlük Kalite Dağılımı</span>
+                    <span class="d-inline d-sm-none">Kalite</span>
                 </h5>
             </div>
             <div class="card-body">
-                <canvas id="qualityChart" width="300" height="200" style="max-height: 200px;"></canvas>
+                <div class="chart-container" style="position: relative; height: 200px; max-height: 200px;">
+                    <canvas id="qualityChart"></canvas>
+                </div>
                 
                 <div class="mt-3">
                     <div class="d-flex justify-content-between align-items-center mb-1">
@@ -187,15 +250,17 @@
 
 <!-- Son Aktiviteler -->
 <div class="row">
-    <div class="col-md-6">
+    <div class="col-12 col-lg-6 mb-4 mb-lg-0">
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h5 class="mb-0">
                     <i class="fas fa-clock me-2"></i>
-                    Son Provalar
+                    <span class="d-none d-sm-inline">Son Provalar</span>
+                    <span class="d-inline d-sm-none">Provalar</span>
                 </h5>
                 <a href="{{ route('samples.index') }}" class="btn btn-outline-primary btn-sm">
-                    Tümünü Gör
+                    <span class="d-none d-sm-inline">Tümünü Gör</span>
+                    <span class="d-inline d-sm-none">Tümü</span>
                 </a>
             </div>
             <div class="card-body">
@@ -207,13 +272,15 @@
                 @else
                     <div class="list-group list-group-flush">
                         @foreach($recentActivities['latest_samples']->take(5) as $sample)
-                            <div class="list-group-item px-0">
+                            <div class="list-group-item px-0 border-0">
                                 <div class="d-flex justify-content-between align-items-start">
-                                    <div>
-                                        <h6 class="mb-1">
-                                            {{ $sample->casting->furnace->name ?? 'N/A' }} - 
-                                            Döküm #{{ $sample->casting->casting_number }}
-                                        </h6>
+                                    <div class="flex-grow-1">
+                                        <div class="d-flex align-items-center mb-1">
+                                            <h6 class="mb-0 me-2">
+                                                <span class="d-none d-sm-inline">{{ $sample->casting->furnace->name ?? 'N/A' }} - </span>
+                                                Döküm #{{ $sample->casting->casting_number }}
+                                            </h6>
+                                        </div>
                                         <p class="mb-1 small">
                                             Prova #{{ $sample->sample_number }} - 
                                             {{ $sample->analyzed_by }}
@@ -228,7 +295,7 @@
                                         @elseif($sample->quality_status === 'pending') bg-warning
                                         @elseif($sample->quality_status === 'needs_adjustment') bg-info
                                         @else bg-secondary
-                                        @endif">
+                                        @endif ms-2">
                                         @if($sample->quality_status === 'approved') Onaylandı
                                         @elseif($sample->quality_status === 'rejected') Reddedildi
                                         @elseif($sample->quality_status === 'pending') Beklemede
@@ -245,12 +312,13 @@
         </div>
     </div>
     
-    <div class="col-md-6">
+    <div class="col-12 col-lg-6">
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h5 class="mb-0">
                     <i class="fas fa-tools me-2"></i>
-                    Son Ham Madde Eklemeleri
+                    <span class="d-none d-sm-inline">Son Ham Madde Eklemeleri</span>
+                    <span class="d-inline d-sm-none">Ham Madde</span>
                 </h5>
                 <span class="badge bg-info">{{ $dailyStats['total_adjustments'] }} Bugün</span>
             </div>
@@ -263,15 +331,15 @@
                 @else
                     <div class="list-group list-group-flush">
                         @foreach($recentActivities['latest_adjustments'] as $adjustment)
-                            <div class="list-group-item px-0">
+                            <div class="list-group-item px-0 border-0">
                                 <div class="d-flex justify-content-between align-items-start">
-                                    <div>
+                                    <div class="flex-grow-1">
                                         <h6 class="mb-1">
                                             {{ $adjustment->getMaterialNameTurkish() }}
                                             <small class="text-muted">({{ $adjustment->amount_kg }} kg)</small>
                                         </h6>
                                         <p class="mb-1 small">
-                                            {{ $adjustment->casting->furnace->name ?? 'N/A' }} - 
+                                            <span class="d-none d-sm-inline">{{ $adjustment->casting->furnace->name ?? 'N/A' }} - </span>
                                             Döküm #{{ $adjustment->casting->casting_number }}
                                         </p>
                                         <small class="text-muted">
@@ -279,7 +347,7 @@
                                             {{ $adjustment->added_by }}
                                         </small>
                                     </div>
-                                    <span class="badge {{ $adjustment->is_successful ? 'bg-success' : 'bg-warning' }}">
+                                    <span class="badge {{ $adjustment->is_successful ? 'bg-success' : 'bg-warning' }} ms-2">
                                         {{ $adjustment->is_successful ? 'Başarılı' : 'Beklemede' }}
                                     </span>
                                 </div>
@@ -355,9 +423,17 @@ const qualityChart = new Chart(ctx, {
     },
     options: {
         responsive: true,
-        maintainAspectRatio: true,
+        maintainAspectRatio: false,
         plugins: {
             legend: {
+                display: false
+            }
+        },
+        scales: {
+            x: {
+                display: false
+            },
+            y: {
                 display: false
             }
         }
