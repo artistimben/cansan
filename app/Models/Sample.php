@@ -23,6 +23,9 @@ class Sample extends Model
         'carbon_content',
         'manganese_content',
         'silicon_content',
+        'sulfur_content',
+        'phosphorus_content',
+        'copper_content',
         'temperature',
         'quality_standard_id',
         'sampled_by',
@@ -45,6 +48,9 @@ class Sample extends Model
         'carbon_content' => 'decimal:3',
         'manganese_content' => 'decimal:3',
         'silicon_content' => 'decimal:3',
+        'sulfur_content' => 'decimal:3',
+        'phosphorus_content' => 'decimal:3',
+        'copper_content' => 'decimal:3',
         'temperature' => 'decimal:2'
     ];
 
@@ -274,5 +280,53 @@ class Sample extends Model
     public function qualityStandard(): BelongsTo
     {
         return $this->belongsTo(QualityStandard::class);
+    }
+    
+    /**
+     * Accessor: Carbon değeri
+     */
+    public function getCarbonAttribute()
+    {
+        return $this->carbon_content;
+    }
+    
+    /**
+     * Accessor: Silicon değeri
+     */
+    public function getSiliconAttribute()
+    {
+        return $this->silicon_content;
+    }
+    
+    /**
+     * Accessor: Manganese değeri
+     */
+    public function getManganeseAttribute()
+    {
+        return $this->manganese_content;
+    }
+    
+    /**
+     * Accessor: Sulfur değeri
+     */
+    public function getSulfurAttribute()
+    {
+        return $this->sulfur_content;
+    }
+    
+    /**
+     * Accessor: Phosphorus değeri
+     */
+    public function getPhosphorusAttribute()
+    {
+        return $this->phosphorus_content;
+    }
+    
+    /**
+     * Accessor: Copper değeri
+     */
+    public function getCopperAttribute()
+    {
+        return $this->copper_content;
     }
 }

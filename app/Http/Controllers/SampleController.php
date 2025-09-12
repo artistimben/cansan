@@ -55,35 +55,52 @@ class SampleController extends Controller
         return view('samples.index', compact('samples', 'furnaces', 'qualityStatuses'));
     }
     
-    /**
-     * Yeni prova kayıt formu
-     */
-    public function create(Request $request)
-    {
-        $casting_id = $request->get('casting_id');
-        $selectedCasting = null;
-        
-        if ($casting_id) {
-            $selectedCasting = Casting::with(['furnace.furnaceSet', 'samples'])->findOrFail($casting_id);
-        }
-        
-        // Aktif dökümleri getir
-        $activeCastings = Casting::where('status', 'active')
-            ->with(['furnace.furnaceSet', 'samples'])
-            ->orderBy('casting_date', 'desc')
-            ->get();
-        
-        // Kalite standartları
-        $qualityStandards = QualityStandard::all();
-        
-        return view('samples.create', compact('selectedCasting', 'activeCastings', 'qualityStandards'));
-    }
     
     /**
      * Yeni prova kaydet
      */
     public function store(Request $request)
     {
+        // AJAX isteği için farklı validation kuralları
+        if ($request->ajax() || $request->wantsJson()) {
+            $validated = $request->validate([
+                'casting_id' => 'required|exists:castings,id',
+                'carbon' => 'nullable|numeric|min:0|max:10',
+                'silicon' => 'nullable|numeric|min:0|max:10',
+                'manganese' => 'nullable|numeric|min:0|max:10',
+                'sulfur' => 'nullable|numeric|min:0|max:10',
+                'phosphorus' => 'nullable|numeric|min:0|max:10',
+                'copper' => 'nullable|numeric|min:0|max:10',
+            ]);
+            
+            $casting = Casting::findOrFail($validated['casting_id']);
+            
+            // Prova numarası otomatik oluştur
+            $sampleNumber = $casting->samples()->max('sample_number') + 1;
+            
+            $sample = Sample::create([
+                'casting_id' => $validated['casting_id'],
+                'sample_number' => $sampleNumber,
+                'sample_time' => now(),
+                'sample_type' => 'regular',
+                'carbon_content' => $validated['carbon'] ?? 0,
+                'manganese_content' => $validated['manganese'] ?? 0,
+                'silicon_content' => $validated['silicon'] ?? 0,
+                'sulfur_content' => $validated['sulfur'] ?? 0,
+                'phosphorus_content' => $validated['phosphorus'] ?? 0,
+                'copper_content' => $validated['copper'] ?? 0,
+                'temperature' => 1600, // Varsayılan sıcaklık
+                'quality_status' => 'pending'
+            ]);
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Prova başarıyla eklendi!',
+                'sample' => $sample
+            ]);
+        }
+        
+        // Normal form isteği için eski validation
         $validated = $request->validate([
             'casting_id' => 'required|exists:castings,id',
             'sample_number' => 'nullable|integer|min:1',
@@ -135,7 +152,7 @@ class SampleController extends Controller
         // Aksiyon türüne göre yönlendirme
         if ($validated['action'] === 'save_and_add') {
             return redirect()
-                ->route('samples.create', ['casting_id' => $casting->id])
+                ->route('samples.index')
                 ->with('success', $message . ' Yeni prova ekleyebilirsiniz.');
         }
         
@@ -183,6 +200,34 @@ class SampleController extends Controller
      */
     public function update(Request $request, Sample $sample)
     {
+        // AJAX isteği için farklı validation kuralları
+        if ($request->ajax() || $request->wantsJson()) {
+            $validated = $request->validate([
+                'carbon' => 'nullable|numeric|min:0|max:10',
+                'silicon' => 'nullable|numeric|min:0|max:10',
+                'manganese' => 'nullable|numeric|min:0|max:10',
+                'sulfur' => 'nullable|numeric|min:0|max:10',
+                'phosphorus' => 'nullable|numeric|min:0|max:10',
+                'copper' => 'nullable|numeric|min:0|max:10',
+            ]);
+            
+            $sample->update([
+                'carbon_content' => $validated['carbon'] ?? $sample->carbon_content,
+                'manganese_content' => $validated['manganese'] ?? $sample->manganese_content,
+                'silicon_content' => $validated['silicon'] ?? $sample->silicon_content,
+                'sulfur_content' => $validated['sulfur'] ?? $sample->sulfur_content,
+                'phosphorus_content' => $validated['phosphorus'] ?? $sample->phosphorus_content,
+                'copper_content' => $validated['copper'] ?? $sample->copper_content,
+            ]);
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Prova başarıyla güncellendi!',
+                'sample' => $sample
+            ]);
+        }
+        
+        // Normal form isteği için eski validation
         $request->validate([
             'carbon_percentage' => 'nullable|numeric|min:0|max:10',
             'manganese_percentage' => 'nullable|numeric|min:0|max:10',
@@ -346,12 +391,23 @@ class SampleController extends Controller
      */
     public function pending()
     {
-        $samples = Sample::pending()
-            ->with(['casting.furnace.furnaceSet'])
-            ->orderBy('sample_time', 'asc')
-            ->get();
-        
-        return view('samples.pending', compact('samples'));
+        try {
+            $samples = Sample::with(['casting.furnace.furnaceSet'])
+                ->orderBy('sample_time', 'asc')
+                ->get();
+            
+            return response()->json([
+                'success' => true,
+                'samples' => $samples,
+                'count' => $samples->count()
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Provalar getirilemedi: ' . $e->getMessage(),
+                'count' => 0
+            ], 500);
+        }
     }
     
     /**

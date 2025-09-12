@@ -34,6 +34,12 @@ Route::prefix('v1')->group(function () {
         Route::get('/{furnace}/performance', [FurnaceController::class, 'performanceReport'])->name('api.furnaces.performance');
     });
     
+    // Döküm işlemleri
+    Route::prefix('castings')->group(function () {
+        Route::post('/{casting}/update-furnace', [FurnaceController::class, 'updateCastingFurnace'])->name('api.castings.update-furnace');
+        Route::post('/{casting}/cancel', [FurnaceController::class, 'cancelCasting'])->name('api.castings.cancel');
+    });
+    
     // Prova işlemleri
     Route::prefix('samples')->group(function () {
         Route::get('/', [SampleController::class, 'index'])->name('api.samples.index');

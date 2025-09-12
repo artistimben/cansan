@@ -6,11 +6,11 @@
 
 @section('header-buttons')
     <div class="btn-group d-none d-md-flex" role="group">
-        <a href="{{ route('samples.create') }}" class="btn btn-primary btn-sm">
+        <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addProvaModal">
             <i class="fas fa-plus me-1"></i>
             Yeni Prova
         </a>
-        <a href="{{ route('samples.pending') }}" class="btn btn-warning btn-sm">
+        <a href="{{ route('samples.index') }}" class="btn btn-warning btn-sm">
             <i class="fas fa-hourglass-half me-1"></i>
             Bekleyen Provalar
         </a>
@@ -26,10 +26,10 @@
     
     <!-- Mobile buttons -->
     <div class="d-flex d-md-none gap-2">
-        <a href="{{ route('samples.create') }}" class="btn btn-primary btn-sm">
+        <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addProvaModal">
             <i class="fas fa-plus"></i>
         </a>
-        <a href="{{ route('samples.pending') }}" class="btn btn-warning btn-sm">
+        <a href="{{ route('samples.index') }}" class="btn btn-warning btn-sm">
             <i class="fas fa-hourglass-half"></i>
         </a>
         <button type="button" class="btn btn-outline-info btn-sm" data-bs-toggle="modal" data-bs-target="#filterModal">
@@ -328,10 +328,10 @@
                         <i class="fas fa-vial fa-3x mb-3"></i>
                         <h5>Prova bulunamadı</h5>
                         <p>Henüz hiç prova kaydı yok veya filtre kriterlerinize uygun prova bulunamadı.</p>
-                        <a href="{{ route('samples.create') }}" class="btn btn-primary">
+                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addProvaModal">
                             <i class="fas fa-plus me-1"></i>
                             İlk Provayı Ekle
-                        </a>
+                        </button>
                     </div>
                 @endif
             </div>
@@ -454,6 +454,53 @@
     </div>
 </div>
 
+<!-- Yeni Prova Ekleme Modalı -->
+<div class="modal fade" id="addProvaModal" tabindex="-1" aria-labelledby="addProvaModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addProvaModalLabel">Yeni Prova Ekle</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addProvaForm">
+                    <input type="hidden" id="castingId" name="casting_id">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="new_carbon" class="form-label">Karbon (C)</label>
+                            <input type="number" class="form-control" id="new_carbon" name="carbon" step="0.01" min="0">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="new_silicon" class="form-label">Silisyum (Sİ)</label>
+                            <input type="number" class="form-control" id="new_silicon" name="silicon" step="0.01" min="0">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="new_manganese" class="form-label">Mangan (MN)</label>
+                            <input type="number" class="form-control" id="new_manganese" name="manganese" step="0.01" min="0">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="new_sulfur" class="form-label">Kükürt (S)</label>
+                            <input type="number" class="form-control" id="new_sulfur" name="sulfur" step="0.01" min="0">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="new_phosphorus" class="form-label">Fosfor (P)</label>
+                            <input type="number" class="form-control" id="new_phosphorus" name="phosphorus" step="0.01" min="0">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="new_copper" class="form-label">Bakır (CU)</label>
+                            <input type="number" class="form-control" id="new_copper" name="copper" step="0.01" min="0">
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+                <button type="button" class="btn btn-success" id="saveNewProvaBtn">Prova Ekle</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 @endsection
 
 @push('scripts')
@@ -560,7 +607,7 @@ document.addEventListener('keydown', function(e) {
     // Ctrl + N: Yeni prova
     if (e.ctrlKey && e.key === 'n') {
         e.preventDefault();
-        window.location.href = '{{ route("samples.create") }}';
+        $('#addProvaModal').modal('show');
     }
     
     // Ctrl + F: Filtre
@@ -569,6 +616,92 @@ document.addEventListener('keydown', function(e) {
         const modal = new bootstrap.Modal(document.getElementById('filterModal'));
         modal.show();
     }
+});
+
+// Yeni prova ekleme - Sadece bir kez bağla
+$(document).off('click', '.add-prova-btn').on('click', '.add-prova-btn', function() {
+    const castingId = $(this).data('casting-id');
+    $('#castingId').val(castingId);
+    $('#addProvaForm')[0].reset();
+    $('#addProvaModal').modal('show');
+});
+
+// Yeni prova kaydetme - Sadece bir kez bağla
+$(document).off('click', '#saveNewProvaBtn').on('click', '#saveNewProvaBtn', function(e) {
+    e.preventDefault();
+    
+    console.log('Prova ekleme butonu tıklandı'); // Debug
+    
+    const castingId = $('#castingId').val();
+    console.log('Casting ID:', castingId); // Debug
+    
+    if (!castingId) {
+        alert('Döküm ID bulunamadı!');
+        return;
+    }
+    
+    const formData = {
+        casting_id: castingId,
+        carbon: $('#new_carbon').val() || 0,
+        silicon: $('#new_silicon').val() || 0,
+        manganese: $('#new_manganese').val() || 0,
+        sulfur: $('#new_sulfur').val() || 0,
+        phosphorus: $('#new_phosphorus').val() || 0,
+        copper: $('#new_copper').val() || 0,
+        _token: $('meta[name="csrf-token"]').attr('content')
+    };
+    
+    console.log('Gönderilen veri:', formData); // Debug
+    
+    // Butonu devre dışı bırak
+    $(this).prop('disabled', true).text('Ekleniyor...');
+    
+    $.ajax({
+        url: '/samples',
+        type: 'POST',
+        data: formData,
+        dataType: 'json',
+        beforeSend: function(xhr) {
+            xhr.setRequestHeader('X-CSRF-TOKEN', $('meta[name="csrf-token"]').attr('content'));
+        },
+        success: function(response) {
+            console.log('Başarılı yanıt:', response);
+            alert('Prova başarıyla eklendi!');
+            // Modalı kapat
+            $('#addProvaModal').modal('hide');
+            // Sayfayı yenile
+            location.reload();
+        },
+        error: function(xhr, status, error) {
+            console.error('AJAX Hatası:', {
+                status: xhr.status,
+                statusText: xhr.statusText,
+                responseText: xhr.responseText,
+                error: error
+            });
+            
+            let errorMessage = 'Bilinmeyen hata';
+            if (xhr.responseJSON) {
+                if (xhr.responseJSON.message) {
+                    errorMessage = xhr.responseJSON.message;
+                } else if (xhr.responseJSON.errors) {
+                    errorMessage = Object.values(xhr.responseJSON.errors).flat().join(', ');
+                }
+            } else if (xhr.status === 422) {
+                errorMessage = 'Doğrulama hatası - Lütfen tüm alanları kontrol edin';
+            } else if (xhr.status === 500) {
+                errorMessage = 'Sunucu hatası - Lütfen tekrar deneyin';
+            } else if (xhr.status === 404) {
+                errorMessage = 'Sayfa bulunamadı - Route kontrol edin';
+            }
+            
+            alert('Hata: ' + errorMessage);
+        },
+        complete: function() {
+            // Butonu tekrar aktif et
+            $('#saveNewProvaBtn').prop('disabled', false).text('Prova Ekle');
+        }
+    });
 });
 </script>
 @endpush

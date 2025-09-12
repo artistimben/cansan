@@ -6,14 +6,14 @@
 
 @section('header-buttons')
     <div class="btn-group d-none d-md-flex" role="group">
-        <a href="{{ route('castings.create') }}" class="btn btn-success btn-sm" onclick="console.log('Yeni Döküm butonu tıklandı')">
+        <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#addProvaModal" onclick="console.log('Yeni Döküm butonu tıklandı')">
             <i class="fas fa-plus-circle me-1"></i>
             Yeni Döküm
-        </a>
-        <a href="{{ route('samples.create') }}" class="btn btn-primary btn-sm">
+        </button>
+        <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addProvaModal">
             <i class="fas fa-plus me-1"></i>
             Yeni Prova
-        </a>
+        </button>
         <button type="button" class="btn btn-outline-primary btn-sm" onclick="refreshDashboard()">
             <i class="fas fa-sync-alt me-1"></i>
             Yenile
@@ -26,12 +26,12 @@
     
     <!-- Mobile buttons -->
     <div class="d-flex d-md-none gap-2">
-        <a href="{{ route('castings.create') }}" class="btn btn-success btn-sm">
+        <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#addProvaModal">
             <i class="fas fa-plus-circle"></i>
-        </a>
-        <a href="{{ route('samples.create') }}" class="btn btn-primary btn-sm">
+        </button>
+        <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addProvaModal">
             <i class="fas fa-plus"></i>
-        </a>
+        </button>
         <button type="button" class="btn btn-outline-primary btn-sm" onclick="refreshDashboard()">
             <i class="fas fa-sync-alt"></i>
         </button>
@@ -248,113 +248,43 @@
     </div>
 </div>
 
-<!-- Son Aktiviteler -->
+<!-- Hızlı İşlemler -->
 <div class="row">
-    <div class="col-12 col-lg-6 mb-4 mb-lg-0">
+    <div class="col-12">
         <div class="card">
-            <div class="card-header d-flex justify-content-between align-items-center">
+            <div class="card-header">
                 <h5 class="mb-0">
-                    <i class="fas fa-clock me-2"></i>
-                    <span class="d-none d-sm-inline">Son Provalar</span>
-                    <span class="d-inline d-sm-none">Provalar</span>
+                    <i class="fas fa-bolt me-2"></i>
+                    Hızlı İşlemler
                 </h5>
-                <a href="{{ route('samples.index') }}" class="btn btn-outline-primary btn-sm">
-                    <span class="d-none d-sm-inline">Tümünü Gör</span>
-                    <span class="d-inline d-sm-none">Tümü</span>
-                </a>
             </div>
             <div class="card-body">
-                @if($recentActivities['latest_samples']->isEmpty())
-                    <div class="text-center text-muted py-3">
-                        <i class="fas fa-info-circle me-1"></i>
-                        Henüz prova kaydı yok
+                <div class="row">
+                    <div class="col-6 col-md-3 mb-3">
+                        <button type="button" class="btn btn-primary w-100 h-100 d-flex flex-column align-items-center justify-content-center py-3" data-bs-toggle="modal" data-bs-target="#addProvaModal">
+                            <i class="fas fa-plus-circle fa-2x mb-2"></i>
+                            <span>Yeni Döküm</span>
+                        </button>
                     </div>
-                @else
-                    <div class="list-group list-group-flush">
-                        @foreach($recentActivities['latest_samples']->take(5) as $sample)
-                            <div class="list-group-item px-0 border-0">
-                                <div class="d-flex justify-content-between align-items-start">
-                                    <div class="flex-grow-1">
-                                        <div class="d-flex align-items-center mb-1">
-                                            <h6 class="mb-0 me-2">
-                                                <span class="d-none d-sm-inline">{{ $sample->casting->furnace->name ?? 'N/A' }} - </span>
-                                                Döküm #{{ $sample->casting->casting_number }}
-                                            </h6>
-                                        </div>
-                                        <p class="mb-1 small">
-                                            Prova #{{ $sample->sample_number }} - 
-                                            {{ $sample->analyzed_by }}
-                                        </p>
-                                        <small class="text-muted">
-                                            {{ $sample->sample_time->diffForHumans() }}
-                                        </small>
-                                    </div>
-                                    <span class="badge 
-                                        @if($sample->quality_status === 'approved') bg-success
-                                        @elseif($sample->quality_status === 'rejected') bg-danger
-                                        @elseif($sample->quality_status === 'pending') bg-warning
-                                        @elseif($sample->quality_status === 'needs_adjustment') bg-info
-                                        @else bg-secondary
-                                        @endif ms-2">
-                                        @if($sample->quality_status === 'approved') Onaylandı
-                                        @elseif($sample->quality_status === 'rejected') Reddedildi
-                                        @elseif($sample->quality_status === 'pending') Beklemede
-                                        @elseif($sample->quality_status === 'needs_adjustment') Düzeltme Gerekli
-                                        @else {{ $sample->quality_status }}
-                                        @endif
-                                    </span>
-                                </div>
-                            </div>
-                        @endforeach
+                    <div class="col-6 col-md-3 mb-3">
+                        <button type="button" class="btn btn-success w-100 h-100 d-flex flex-column align-items-center justify-content-center py-3" data-bs-toggle="modal" data-bs-target="#addProvaModal">
+                            <i class="fas fa-vial fa-2x mb-2"></i>
+                            <span>Yeni Prova</span>
+                        </button>
                     </div>
-                @endif
-            </div>
-        </div>
-    </div>
-    
-    <div class="col-12 col-lg-6">
-        <div class="card">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <h5 class="mb-0">
-                    <i class="fas fa-tools me-2"></i>
-                    <span class="d-none d-sm-inline">Son Ham Madde Eklemeleri</span>
-                    <span class="d-inline d-sm-none">Ham Madde</span>
-                </h5>
-                <span class="badge bg-info">{{ $dailyStats['total_adjustments'] }} Bugün</span>
-            </div>
-            <div class="card-body">
-                @if($recentActivities['latest_adjustments']->isEmpty())
-                    <div class="text-center text-muted py-3">
-                        <i class="fas fa-info-circle me-1"></i>
-                        Bugün ham madde eklenmedi
+                    <div class="col-6 col-md-3 mb-3">
+                        <a href="{{ route('samples.index') }}" class="btn btn-warning w-100 h-100 d-flex flex-column align-items-center justify-content-center py-3">
+                            <i class="fas fa-list fa-2x mb-2"></i>
+                            <span>Provalar</span>
+                        </a>
                     </div>
-                @else
-                    <div class="list-group list-group-flush">
-                        @foreach($recentActivities['latest_adjustments'] as $adjustment)
-                            <div class="list-group-item px-0 border-0">
-                                <div class="d-flex justify-content-between align-items-start">
-                                    <div class="flex-grow-1">
-                                        <h6 class="mb-1">
-                                            {{ $adjustment->getMaterialNameTurkish() }}
-                                            <small class="text-muted">({{ $adjustment->amount_kg }} kg)</small>
-                                        </h6>
-                                        <p class="mb-1 small">
-                                            <span class="d-none d-sm-inline">{{ $adjustment->casting->furnace->name ?? 'N/A' }} - </span>
-                                            Döküm #{{ $adjustment->casting->casting_number }}
-                                        </p>
-                                        <small class="text-muted">
-                                            {{ $adjustment->adjustment_date->diffForHumans() }} - 
-                                            {{ $adjustment->added_by }}
-                                        </small>
-                                    </div>
-                                    <span class="badge {{ $adjustment->is_successful ? 'bg-success' : 'bg-warning' }} ms-2">
-                                        {{ $adjustment->is_successful ? 'Başarılı' : 'Beklemede' }}
-                                    </span>
-                                </div>
-                            </div>
-                        @endforeach
+                    <div class="col-6 col-md-3 mb-3">
+                        <a href="{{ route('reports.daily') }}" class="btn btn-info w-100 h-100 d-flex flex-column align-items-center justify-content-center py-3">
+                            <i class="fas fa-chart-line fa-2x mb-2"></i>
+                            <span>Raporlar</span>
+                        </a>
                     </div>
-                @endif
+                </div>
             </div>
         </div>
     </div>
@@ -370,11 +300,11 @@
             </div>
             <div class="modal-body">
                 <div class="d-grid gap-2">
-                    <a href="{{ route('samples.create') }}" class="btn btn-primary">
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addProvaModal">
                         <i class="fas fa-plus me-2"></i>
                         Yeni Prova Ekle
-                    </a>
-                    <a href="{{ route('samples.pending') }}" class="btn btn-warning">
+                    </button>
+                    <a href="{{ route('samples.index') }}" class="btn btn-warning">
                         <i class="fas fa-hourglass-half me-2"></i>
                         Bekleyen Provaları Görüntüle
                     </a>
@@ -387,6 +317,53 @@
                         Rapor İndir
                     </button>
                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Yeni Prova Ekleme Modalı -->
+<div class="modal fade" id="addProvaModal" tabindex="-1" aria-labelledby="addProvaModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addProvaModalLabel">Yeni Prova Ekle</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addProvaForm">
+                    <input type="hidden" id="castingId" name="casting_id">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="new_carbon" class="form-label">Karbon (C)</label>
+                            <input type="number" class="form-control" id="new_carbon" name="carbon" step="0.01" min="0">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="new_silicon" class="form-label">Silisyum (Sİ)</label>
+                            <input type="number" class="form-control" id="new_silicon" name="silicon" step="0.01" min="0">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="new_manganese" class="form-label">Mangan (MN)</label>
+                            <input type="number" class="form-control" id="new_manganese" name="manganese" step="0.01" min="0">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="new_sulfur" class="form-label">Kükürt (S)</label>
+                            <input type="number" class="form-control" id="new_sulfur" name="sulfur" step="0.01" min="0">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="new_phosphorus" class="form-label">Fosfor (P)</label>
+                            <input type="number" class="form-control" id="new_phosphorus" name="phosphorus" step="0.01" min="0">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="new_copper" class="form-label">Bakır (CU)</label>
+                            <input type="number" class="form-control" id="new_copper" name="copper" step="0.01" min="0">
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+                <button type="button" class="btn btn-success" id="saveNewProvaBtn">Prova Ekle</button>
             </div>
         </div>
     </div>
@@ -407,10 +384,10 @@ const qualityChart = new Chart(ctx, {
         labels: ['Onaylanan', 'Reddedilen', 'Bekleyen', 'Düzeltme Gerekli'],
         datasets: [{
             data: [
-                {{ $dailyStats['approved_samples'] }},
-                {{ $dailyStats['rejected_samples'] }},
-                {{ $dailyStats['pending_samples'] }},
-                {{ $dailyStats['needs_adjustment'] }}
+                @json($dailyStats['approved_samples']),
+                @json($dailyStats['rejected_samples']),
+                @json($dailyStats['pending_samples']),
+                @json($dailyStats['needs_adjustment'])
             ],
             backgroundColor: [
                 '#059669', // success
@@ -527,13 +504,13 @@ document.addEventListener('keydown', function(e) {
     // Ctrl + N: Yeni prova
     if (e.ctrlKey && e.key === 'n') {
         e.preventDefault();
-        window.location.href = '{{ route("samples.create") }}';
+        $('#addProvaModal').modal('show');
     }
     
     // Ctrl + P: Bekleyen provalar
     if (e.ctrlKey && e.key === 'p') {
         e.preventDefault();
-        window.location.href = '{{ route("samples.pending") }}';
+        window.location.href = '{{ route("samples.index") }}';
     }
 });
 
@@ -548,6 +525,92 @@ window.addEventListener('beforeunload', function() {
     if (autoRefreshInterval) {
         clearInterval(autoRefreshInterval);
     }
+});
+
+// Yeni prova ekleme - Sadece bir kez bağla
+$(document).off('click', '.add-prova-btn').on('click', '.add-prova-btn', function() {
+    const castingId = $(this).data('casting-id');
+    $('#castingId').val(castingId);
+    $('#addProvaForm')[0].reset();
+    $('#addProvaModal').modal('show');
+});
+
+// Yeni prova kaydetme - Sadece bir kez bağla
+$(document).off('click', '#saveNewProvaBtn').on('click', '#saveNewProvaBtn', function(e) {
+    e.preventDefault();
+    
+    console.log('Prova ekleme butonu tıklandı'); // Debug
+    
+    const castingId = $('#castingId').val();
+    console.log('Casting ID:', castingId); // Debug
+    
+    if (!castingId) {
+        alert('Döküm ID bulunamadı!');
+        return;
+    }
+    
+    const formData = {
+        casting_id: castingId,
+        carbon: $('#new_carbon').val() || 0,
+        silicon: $('#new_silicon').val() || 0,
+        manganese: $('#new_manganese').val() || 0,
+        sulfur: $('#new_sulfur').val() || 0,
+        phosphorus: $('#new_phosphorus').val() || 0,
+        copper: $('#new_copper').val() || 0,
+        _token: $('meta[name="csrf-token"]').attr('content')
+    };
+    
+    console.log('Gönderilen veri:', formData); // Debug
+    
+    // Butonu devre dışı bırak
+    $(this).prop('disabled', true).text('Ekleniyor...');
+    
+    $.ajax({
+        url: '/samples',
+        type: 'POST',
+        data: formData,
+        dataType: 'json',
+        beforeSend: function(xhr) {
+            xhr.setRequestHeader('X-CSRF-TOKEN', $('meta[name="csrf-token"]').attr('content'));
+        },
+        success: function(response) {
+            console.log('Başarılı yanıt:', response);
+            alert('Prova başarıyla eklendi!');
+            // Modalı kapat
+            $('#addProvaModal').modal('hide');
+            // Sayfayı yenile
+            location.reload();
+        },
+        error: function(xhr, status, error) {
+            console.error('AJAX Hatası:', {
+                status: xhr.status,
+                statusText: xhr.statusText,
+                responseText: xhr.responseText,
+                error: error
+            });
+            
+            let errorMessage = 'Bilinmeyen hata';
+            if (xhr.responseJSON) {
+                if (xhr.responseJSON.message) {
+                    errorMessage = xhr.responseJSON.message;
+                } else if (xhr.responseJSON.errors) {
+                    errorMessage = Object.values(xhr.responseJSON.errors).flat().join(', ');
+                }
+            } else if (xhr.status === 422) {
+                errorMessage = 'Doğrulama hatası - Lütfen tüm alanları kontrol edin';
+            } else if (xhr.status === 500) {
+                errorMessage = 'Sunucu hatası - Lütfen tekrar deneyin';
+            } else if (xhr.status === 404) {
+                errorMessage = 'Sayfa bulunamadı - Route kontrol edin';
+            }
+            
+            alert('Hata: ' + errorMessage);
+        },
+        complete: function() {
+            // Butonu tekrar aktif et
+            $('#saveNewProvaBtn').prop('disabled', false).text('Prova Ekle');
+        }
+    });
 });
 </script>
 @endpush

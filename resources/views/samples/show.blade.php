@@ -41,7 +41,7 @@
                             <div class="mb-3">
                                 <label class="form-label fw-bold">Döküm Numarası</label>
                                 <p class="form-control-plaintext">
-                                    <a href="{{ route('castings.show', $sample->casting) }}" class="text-decoration-none">
+                                    <a href="{{ route('furnaces.index') }}" class="text-decoration-none">
                                         {{ $sample->casting->casting_number }}
                                     </a>
                                 </p>
@@ -259,11 +259,11 @@
                         <a href="{{ route('samples.edit', $sample) }}" class="btn btn-outline-primary">
                             <i class="fas fa-edit"></i> Provayı Düzenle
                         </a>
-                        <a href="{{ route('castings.show', $sample->casting) }}" class="btn btn-outline-info">
-                            <i class="fas fa-fire"></i> Dökümü Görüntüle
+                        <a href="{{ route('furnaces.index') }}" class="btn btn-outline-info">
+                            <i class="fas fa-fire"></i> Dökümleri Görüntüle
                         </a>
-                        <a href="{{ route('furnaces.show', $sample->casting->furnace) }}" class="btn btn-outline-warning">
-                            <i class="fas fa-cog"></i> Ocağı Görüntüle
+                        <a href="{{ route('furnaces.index') }}" class="btn btn-outline-warning">
+                            <i class="fas fa-cog"></i> Ocakları Görüntüle
                         </a>
                     </div>
                 </div>

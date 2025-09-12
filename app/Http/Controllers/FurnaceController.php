@@ -17,7 +17,7 @@ class FurnaceController extends Controller
     /**
      * Tüm ocakları listele
      */
-    public function index()
+    public function index(Request $request)
     {
         $furnaceSets = FurnaceSet::with(['furnaces' => function($query) {
             $query->with(['castings' => function($subQuery) {
@@ -37,7 +37,129 @@ class FurnaceController extends Controller
             'inactive' => $furnaces->where('status', 'inactive')->count(),
         ];
         
-        return view('furnaces.index', compact('furnaceSets', 'furnaces', 'statusCounts'));
+        // Tüm dökümler için filtreleme (iptal edilenler hariç)
+        $query = Casting::with(['furnace.furnaceSet', 'samples', 'adjustments'])
+            ->where('status', '!=', 'cancelled'); // İptal edilen dökümleri filtrele
+        
+        if ($request->filled('furnace_id')) {
+            $query->where('furnace_id', $request->furnace_id);
+        }
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        if ($request->filled('shift')) {
+            $query->where('shift', $request->shift);
+        }
+
+        if ($request->filled('date_from')) {
+            $query->whereDate('casting_date', '>=', $request->date_from);
+        }
+
+        if ($request->filled('date_to')) {
+            $query->whereDate('casting_date', '<=', $request->date_to);
+        }
+        
+        // Önce aktif dökümler, sonra tamamlanmış dökümler
+        // Aynı ocağın dökümleri sıralı olacak şekilde
+        $allCastings = $query->orderBy('status', 'asc') // active önce gelir
+            ->orderBy('furnace_id', 'asc') // Aynı ocağın dökümleri birlikte
+            ->orderBy('casting_number', 'asc') // Döküm numarasına göre sırala (OCAK1-1, OCAK1-2, OCAK1-3)
+            ->get();
+        
+        // Aktif ocakları al (set kuralı ile - her setten sadece bir aktif ocak)
+        $activeFurnaces = $furnaces->where('status', 'active')
+            ->groupBy('furnace_set_id')
+            ->map(function($setFurnaces) {
+                return $setFurnaces->first(); // Her setten sadece ilk ocağı al
+            })
+            ->values();
+        
+        // Aktif ocakları CHARGING olarak döküm listesinin başına ekle
+        $chargingItems = collect();
+        foreach ($activeFurnaces as $furnace) {
+            // Bu ocağın aktif dökümü var mı kontrol et
+            $hasActiveCasting = $allCastings->where('furnace_id', $furnace->id)->where('status', 'active')->count() > 0;
+            
+            // Eğer aktif dökümü yoksa, CHARGING item'ı ekle
+            if (!$hasActiveCasting) {
+                $chargingItem = (object) [
+                    'id' => 'charging_' . $furnace->id,
+                    'furnace_id' => $furnace->id,
+                    'furnace' => $furnace,
+                    'status' => 'charging',
+                    'casting_number' => 'CHARGING',
+                    'started_at' => now(),
+                    'completed_at' => null,
+                    'final_temperature' => null,
+                    'target_temperature' => $furnace->current_temperature ?? 1600,
+                    'operator_name' => 'Sistem',
+                    'notes' => 'Yeni döküm için hazır',
+                    'samples' => collect(),
+                    'adjustments' => collect(),
+                    'is_charging' => true,
+                    'created_at' => now(),
+                    'updated_at' => now()
+                ];
+                $chargingItems->push($chargingItem);
+            }
+        }
+        
+        // CHARGING item'larını döküm listesinin başına ekle
+        $allCastings = $chargingItems->concat($allCastings);
+        
+        // Pagination için manuel olarak böl
+        $perPage = 10;
+        $currentPage = request()->get('page', 1);
+        $offset = ($currentPage - 1) * $perPage;
+        $items = $allCastings->slice($offset, $perPage)->values();
+        
+        // Pagination objesi oluştur
+        $allCastings = new \Illuminate\Pagination\LengthAwarePaginator(
+            $items,
+            $allCastings->count(),
+            $perPage,
+            $currentPage,
+            [
+                'path' => request()->url(),
+                'pageName' => 'page',
+            ]
+        );
+        
+        // Her ocağın döküm sayısını hesapla (iptal edilenler hariç)
+        $furnaceCastingCounts = Casting::selectRaw('furnace_id, COUNT(*) as casting_count')
+            ->where('status', '!=', 'cancelled')
+            ->groupBy('furnace_id')
+            ->pluck('casting_count', 'furnace_id');
+        
+        // Her döküm için o ocağın o dökümdeki sırasını hesapla (iptal edilenler hariç)
+        $castingFurnaceSequence = [];
+        foreach ($allCastings as $casting) {
+            $furnaceId = $casting->furnace_id;
+            
+            // CHARGING item'ları için özel işlem
+            if (isset($casting->is_charging) && $casting->is_charging) {
+                // CHARGING item'ları için ocağın mevcut döküm sayısını al
+                $sequenceNumber = $furnaceCastingCounts[$furnaceId] ?? 0;
+            } else {
+                // Normal dökümler için created_at kullan
+                $castingDate = $casting->created_at;
+                
+                // Bu ocağın bu dökümden önceki döküm sayısını hesapla (iptal edilenler hariç)
+                $sequenceNumber = Casting::where('furnace_id', $furnaceId)
+                    ->where('status', '!=', 'cancelled')
+                    ->where('created_at', '<=', $castingDate)
+                    ->count();
+            }
+            
+            $castingFurnaceSequence[$casting->id] = $sequenceNumber;
+        }
+        
+        // Toplam döküm sayısını hesapla (iptal edilenler hariç)
+        $totalCastings = Casting::where('status', '!=', 'cancelled')->count();
+        
+        return view('furnaces.index', compact('furnaceSets', 'furnaces', 'statusCounts', 'allCastings', 'totalCastings', 'furnaceCastingCounts', 'castingFurnaceSequence'));
     }
     
     /**
@@ -172,12 +294,46 @@ class FurnaceController extends Controller
                 'message' => 'Bu ocakta zaten aktif bir döküm bulunuyor. Önce mevcut dökümü tamamlayın.'
             ], 400);
         }
+
+        // Aynı sette başka aktif ocak var mı kontrol et
+        $activeFurnaceInSameSet = Furnace::where('furnace_set_id', $furnace->furnace_set_id)
+            ->where('id', '!=', $furnace->id)
+            ->where('status', 'active')
+            ->first();
+
+        if ($activeFurnaceInSameSet) {
+            return response()->json([
+                'success' => false,
+                'message' => "Aynı sette zaten aktif bir ocak bulunuyor: {$activeFurnaceInSameSet->name}. Sadece set başına bir ocak çalışabilir."
+            ], 400);
+        }
         
-        // Döküm numarası formatı: "3.OCAK-27.DÖKÜM"
+        // Döküm numarası formatı: "OCAK3-3.DÖKÜM"
         $furnaceName = strtoupper(str_replace(' ', '', $furnace->name));
-        $castingCount = $furnace->castings()->count();
-        $nextCastingNumber = $castingCount + 1;
+        
+        // Bu ocak için en son döküm numarasını bul
+        $lastCasting = $furnace->castings()
+            ->where('casting_number', 'like', $furnaceName . '-%.DÖKÜM')
+            ->orderBy('created_at', 'desc')
+            ->first();
+        
+        if ($lastCasting) {
+            // Son döküm numarasından bir sonraki numarayı al
+            preg_match('/' . preg_quote($furnaceName) . '-(\d+)\.DÖKÜM/', $lastCasting->casting_number, $matches);
+            $nextCastingNumber = isset($matches[1]) ? (int)$matches[1] + 1 : 1;
+        } else {
+            // İlk döküm
+            $nextCastingNumber = 1;
+        }
+        
         $castingNumber = $furnaceName . '-' . $nextCastingNumber . '.DÖKÜM';
+        
+        // Aynı numara varsa tekrar dene
+        $counter = 1;
+        while (Casting::where('casting_number', $castingNumber)->exists()) {
+            $castingNumber = $furnaceName . '-' . ($nextCastingNumber + $counter) . '.DÖKÜM';
+            $counter++;
+        }
         
         // Yeni döküm oluştur
         $casting = $furnace->castings()->create([
@@ -199,6 +355,9 @@ class FurnaceController extends Controller
                 'Sistem'
             );
         }
+        
+        // Ocak döküm sayısını hesapla (iptal edilenler hariç)
+        $castingCount = $furnace->castings()->where('status', '!=', 'cancelled')->count();
         
         return response()->json([
             'success' => true,
@@ -235,16 +394,16 @@ class FurnaceController extends Controller
 
         // Minimum prova sayısı kontrolü
         $sampleCount = $casting->samples()->count();
-        if ($sampleCount < 3) {
+        if ($sampleCount < 1) {
             return response()->json([
                 'success' => false,
-                'message' => "Döküm tamamlanamaz. En az 3 prova gerekli (Şu an: {$sampleCount} prova)"
+                'message' => "Döküm tamamlanamaz. En az 1 prova gerekli (Şu an: {$sampleCount} prova)"
             ], 400);
         }
 
         // Döküm tamamlama
         $request->validate([
-            'final_temperature' => 'nullable|numeric|min:0|max:2000',
+            'final_temperature' => 'required|numeric|min:0|max:2000',
             'completion_notes' => 'nullable|string|max:1000'
         ]);
 
@@ -266,13 +425,63 @@ class FurnaceController extends Controller
             );
         }
 
+        // Otomatik yeni döküm açma
+        $newCasting = null;
+        if ($request->get('auto_start_next', true)) {
+            try {
+                \Log::info("Otomatik yeni döküm başlatılıyor...");
+                
+                // Yeni döküm numarası hesapla
+                $nextCastingNumber = $this->getNextCastingNumber($furnace);
+                \Log::info("Sonraki döküm numarası: " . $nextCastingNumber);
+                
+                // Döküm numarası formatı: "OCAK1-2.DÖKÜM"
+                $furnaceName = strtoupper(str_replace(' ', '', $furnace->name));
+                $castingNumber = $furnaceName . '-' . $nextCastingNumber . '.DÖKÜM';
+                \Log::info("Döküm numarası: " . $castingNumber);
+                
+                // Yeni döküm oluştur
+                $newCasting = Casting::create([
+                    'furnace_id' => $furnace->id,
+                    'casting_number' => $castingNumber,
+                    'casting_date' => now(),
+                    'shift' => $request->get('shift', 'A'),
+                    'operator_name' => $request->get('operator_name', 'Sistem'),
+                    'target_temperature' => $request->get('target_temperature', 1600),
+                    'status' => 'active',
+                    'started_at' => now(),
+                    'notes' => 'Otomatik başlatılan döküm'
+                ]);
+                
+                \Log::info("Yeni döküm oluşturuldu: " . $newCasting->id);
+                
+                // Ocağın döküm sayacını artır
+                $furnace->incrementCastingCount();
+                \Log::info("Ocak döküm sayacı artırıldı");
+                
+            } catch (\Exception $e) {
+                \Log::error("Yeni döküm oluşturulurken hata: " . $e->getMessage());
+                \Log::error("Stack trace: " . $e->getTraceAsString());
+            }
+        } else {
+            \Log::info("Otomatik yeni döküm başlatma devre dışı");
+        }
+
         return response()->json([
             'success' => true,
-            'message' => "Döküm {$casting->casting_number} başarıyla tamamlandı",
+            'message' => "Döküm {$casting->casting_number} başarıyla tamamlandı" . ($newCasting ? " ve yeni döküm {$newCasting->casting_number} başlatıldı" : ""),
             'casting' => $casting->fresh(),
-            'sample_count' => $sampleCount
+            'sample_count' => $sampleCount,
+            'new_casting' => $newCasting,
+            'furnace_info' => [
+                'id' => $furnace->id,
+                'name' => $furnace->name,
+                'casting_count' => $furnace->casting_count,
+                'next_casting_number' => $newCasting ? $newCasting->casting_number : null
+            ]
         ]);
     }
+    
     
     /**
      * Ocak performans raporu
@@ -533,13 +742,50 @@ class FurnaceController extends Controller
      */
     public function getNextCastingNumber(Furnace $furnace)
     {
-        // Bu ocaktan yapılan toplam döküm sayısı
-        $castingCount = $furnace->castings()->count();
-        $nextCastingNumber = $castingCount + 1;
-        
-        // Döküm numarası formatı: "3.OCAK-27.DÖKÜM"
+        // Bu ocak için en son döküm numarasını bul (iptal edilenler hariç)
         $furnaceName = strtoupper(str_replace(' ', '', $furnace->name));
+        $lastCasting = $furnace->castings()
+            ->where('status', '!=', 'cancelled')
+            ->where('casting_number', 'like', $furnaceName . '-%.DÖKÜM')
+            ->orderBy('created_at', 'desc')
+            ->first();
+        
+        if ($lastCasting) {
+            // Son döküm numarasından bir sonraki numarayı al
+            preg_match('/' . preg_quote($furnaceName) . '-(\d+)\.DÖKÜM/', $lastCasting->casting_number, $matches);
+            $nextCastingNumber = isset($matches[1]) ? (int)$matches[1] + 1 : 1;
+        } else {
+            // İlk döküm
+            $nextCastingNumber = 1;
+        }
+        
+        return $nextCastingNumber;
+    }
+    
+    /**
+     * API: Ocak için bir sonraki döküm numarasını al (JSON response)
+     */
+    public function getNextCastingNumberApi(Furnace $furnace)
+    {
+        // Bu ocak için en son döküm numarasını bul (iptal edilenler hariç)
+        $furnaceName = strtoupper(str_replace(' ', '', $furnace->name));
+        $lastCasting = $furnace->castings()
+            ->where('status', '!=', 'cancelled')
+            ->where('casting_number', 'like', $furnaceName . '-%.DÖKÜM')
+            ->orderBy('created_at', 'desc')
+            ->first();
+        
+        if ($lastCasting) {
+            // Son döküm numarasından bir sonraki numarayı al
+            preg_match('/' . preg_quote($furnaceName) . '-(\d+)\.DÖKÜM/', $lastCasting->casting_number, $matches);
+            $nextCastingNumber = isset($matches[1]) ? (int)$matches[1] + 1 : 1;
+        } else {
+            // İlk döküm
+            $nextCastingNumber = 1;
+        }
+        
         $castingNumber = $furnaceName . '-' . $nextCastingNumber . '.DÖKÜM';
+        $castingCount = $furnace->castings()->count();
         
         return response()->json([
             'success' => true,
@@ -548,6 +794,84 @@ class FurnaceController extends Controller
             'next_number' => $nextCastingNumber,
             'furnace_name' => $furnace->name,
             'furnace_set' => $furnace->furnaceSet->name
+        ]);
+    }
+    
+    /**
+     * Aktif ocakları getir (API) - Set kuralı ile
+     */
+    public function getActiveFurnaces()
+    {
+        // Set başına sadece bir aktif ocak olabilir
+        $furnaces = Furnace::where('status', 'active')
+            ->with('furnaceSet')
+            ->get()
+            ->groupBy('furnace_set_id')
+            ->map(function($setFurnaces) {
+                // Her setten sadece ilk ocağı al
+                return $setFurnaces->first();
+            })
+            ->values()
+            ->map(function($furnace) {
+                return [
+                    'id' => $furnace->id,
+                    'name' => $furnace->name,
+                    'furnace_set_name' => $furnace->furnaceSet->name,
+                    'casting_count' => $furnace->castings()->where('status', '!=', 'cancelled')->count()
+                ];
+            });
+            
+        return response()->json($furnaces);
+    }
+    
+    /**
+     * Dökümün ocağını güncelle
+     */
+    public function updateCastingFurnace(Request $request, Casting $casting)
+    {
+        $request->validate([
+            'furnace_id' => 'required|exists:furnaces,id'
+        ]);
+        
+        $furnace = Furnace::findOrFail($request->furnace_id);
+        
+        // Dökümün ocağını güncelle
+        $casting->update([
+            'furnace_id' => $furnace->id
+        ]);
+        
+        return response()->json([
+            'success' => true,
+            'message' => "Döküm {$casting->casting_number} başarıyla {$furnace->name} ocağına taşındı",
+            'casting' => $casting->fresh(),
+            'furnace' => $furnace
+        ]);
+    }
+    
+    /**
+     * Dökümü iptal et
+     */
+    public function cancelCasting(Request $request, Casting $casting)
+    {
+        // Sadece aktif dökümler iptal edilebilir
+        if ($casting->status !== 'active') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Sadece aktif dökümler iptal edilebilir'
+            ], 400);
+        }
+        
+        // Dökümü iptal et
+        $casting->update([
+            'status' => 'cancelled',
+            'completed_at' => now(),
+            'notes' => $casting->notes . ' [İptal edildi: ' . now()->format('d.m.Y H:i') . ']'
+        ]);
+        
+        return response()->json([
+            'success' => true,
+            'message' => "Döküm {$casting->casting_number} başarıyla iptal edildi",
+            'casting' => $casting->fresh()
         ]);
     }
 
@@ -612,5 +936,151 @@ class FurnaceController extends Controller
             'furnace_name' => $furnace->name,
             'furnace_set' => $furnace->furnaceSet->name
         ]);
+    }
+
+    /**
+     * Aynı set içindeki ocakların durumlarını değiştir
+     */
+    public function swapFurnaceStatus(Request $request)
+    {
+        try {
+            $furnace1Id = $request->input('furnace1_id');
+            $furnace2Id = $request->input('furnace2_id');
+
+            if (!$furnace1Id || !$furnace2Id) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Her iki ocak ID\'si de gerekli.'
+                ], 400);
+            }
+
+            $furnace1 = Furnace::findOrFail($furnace1Id);
+            $furnace2 = Furnace::findOrFail($furnace2Id);
+
+            // Aynı set içinde mi kontrol et
+            if ($furnace1->furnace_set_id !== $furnace2->furnace_set_id) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Sadece aynı set içindeki ocaklar değiştirilebilir.'
+                ], 400);
+            }
+
+            // Set kuralı: Aynı sette sadece bir ocak aktif olabilir
+            $activeFurnaceInSet = Furnace::where('furnace_set_id', $furnace1->furnace_set_id)
+                ->where('status', 'active')
+                ->whereNotIn('id', [$furnace1->id, $furnace2->id])
+                ->first();
+
+            if ($activeFurnaceInSet) {
+                return response()->json([
+                    'success' => false,
+                    'message' => "Aynı sette zaten aktif bir ocak bulunuyor: {$activeFurnaceInSet->name}. Sadece set başına bir ocak çalışabilir."
+                ], 400);
+            }
+
+            // Durumları değiştir
+            $tempStatus = $furnace1->status;
+            $tempTemperature = $furnace1->current_temperature;
+            
+            $furnace1->update([
+                'status' => $furnace2->status,
+                'current_temperature' => $furnace2->current_temperature
+            ]);
+            
+            $furnace2->update([
+                'status' => $tempStatus,
+                'current_temperature' => $tempTemperature
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Ocak durumları başarıyla değiştirildi.',
+                'furnace1' => $furnace1->fresh(),
+                'furnace2' => $furnace2->fresh()
+            ]);
+
+        } catch (\Exception $e) {
+            \Log::error('Ocak durumu değiştirme hatası: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Ocak durumları değiştirilirken hata oluştu: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Ocak detay bilgilerini getir
+     */
+    public function getFurnaceInfo(Furnace $furnace)
+    {
+        try {
+            // Son durum değişikliği tarihini bul
+            $lastStatusChange = $furnace->statusLogs()
+                ->latest('created_at')
+                ->first();
+
+            // Aktif olmayan süreyi hesapla (dakika/saat formatında)
+            $inactiveDuration = null;
+            if ($furnace->status !== 'active' && $lastStatusChange) {
+                $diffInMinutes = $lastStatusChange->created_at->diffInMinutes(now());
+                $hours = floor($diffInMinutes / 60);
+                $minutes = $diffInMinutes % 60;
+                
+                if ($hours > 0) {
+                    $inactiveDuration = $hours . ' saat ' . $minutes . ' dakika';
+                } else {
+                    $inactiveDuration = $minutes . ' dakika';
+                }
+            }
+
+            // Tüm dökümleri getir (sadece bu ocağın dökümleri)
+            $allCastings = $furnace->castings()
+                ->with(['samples', 'adjustments'])
+                ->orderBy('created_at', 'desc')
+                ->get();
+
+            // Genel döküm sıralamasını al (tüm ocakların dökümleri)
+            $allGlobalCastings = Casting::where('status', '!=', 'cancelled')
+                ->orderBy('created_at', 'asc')
+                ->get();
+
+            // Sadece bu ocağın dökümleri için genel sıra numarasını hesapla
+            $castingsWithGlobalOrder = $allCastings->map(function($casting) use ($allGlobalCastings) {
+                // Bu dökümün genel sıralamadaki pozisyonunu bul
+                $globalPosition = $allGlobalCastings->search(function($globalCasting) use ($casting) {
+                    return $globalCasting->id === $casting->id;
+                });
+                
+                $casting->global_order = $globalPosition !== false ? $globalPosition + 1 : null;
+                $casting->furnace_order = $casting->casting_number; // Ocağın kendi sırası
+                return $casting;
+            });
+
+            // İstatistikler
+            $stats = [
+                'total_castings' => $furnace->castings()->count(),
+                'active_castings' => $furnace->castings()->where('status', 'active')->count(),
+                'completed_castings' => $furnace->castings()->where('status', 'completed')->count(),
+                'cancelled_castings' => $furnace->castings()->where('status', 'cancelled')->count(),
+                'average_temperature' => $furnace->temperatureLogs()->avg('temperature'),
+                'last_casting_date' => $furnace->castings()->latest()->first()?->created_at,
+            ];
+
+            return response()->json([
+                'success' => true,
+                'furnace' => $furnace,
+                'inactive_duration' => $inactiveDuration,
+                'all_castings' => $castingsWithGlobalOrder,
+                'stats' => $stats,
+                'last_status_change' => $lastStatusChange
+            ]);
+
+        } catch (\Exception $e) {
+            \Log::error('Ocak bilgi getirme hatası: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Ocak bilgileri alınırken hata oluştu: ' . $e->getMessage()
+            ], 500);
+        }
     }
 }
