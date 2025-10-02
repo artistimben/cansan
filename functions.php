@@ -872,7 +872,17 @@ function complete_day() {
             'fastest_casting' => $fastest_casting,
             'slowest_casting' => $slowest_casting,
             'efficiency' => $efficiency,
-            'expected_daily_castings' => $expected_daily_castings
+            'expected_daily_castings' => $expected_daily_castings,
+            'statistics' => [
+                'total_castings' => $total_castings,
+                'completed_castings' => $completed_castings,
+                'delayed_castings' => $delayed_castings,
+                'total_production_time' => $total_production_time,
+                'average_time' => $total_castings > 0 ? round($total_production_time / $total_castings, 1) : 0,
+                'fastest_casting' => $fastest_casting,
+                'slowest_casting' => $slowest_casting,
+                'efficiency' => $efficiency
+            ]
         ];
         
         // 4. Günlük raporu kaydet

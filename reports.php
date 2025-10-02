@@ -123,6 +123,11 @@ if (isset($_GET['report_id'])) {
             <a class="navbar-brand" href="index.php">
                 <i class="bi bi-arrow-left-circle"></i> Ana Sayfa'ya Dön
             </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link text-white" href="general_reports.php">
+                    <i class="bi bi-graph-up"></i> Genel Raporlar
+                </a>
+            </div>
             <span class="navbar-text text-white">
                 <i class="bi bi-file-earmark-text"></i> Günlük Raporlar
             </span>
@@ -175,7 +180,48 @@ if (isset($_GET['report_id'])) {
             <!-- Sağ Panel: Rapor Detayı -->
             <div class="col-md-9">
                 <?php if ($selected_report): ?>
-                    <?php $data = $selected_report['report_data']; ?>
+                    <?php 
+                    $data = $selected_report['report_data'] ?? [];
+                    // Eski veri yapısı için uyumluluk
+                    if (isset($data['statistics'])) {
+                        $data = array_merge($data, $data['statistics']);
+                    }
+                    // Veri yapısını kontrol et ve varsayılan değerler ver
+                    $data['efficiency'] = $data['efficiency'] ?? 0;
+                    $data['furnace_stats'] = $data['furnace_stats'] ?? [];
+                    $data['castings'] = $data['castings'] ?? [];
+                    $data['total_castings'] = $data['total_castings'] ?? 0;
+                    $data['completed_castings'] = $data['completed_castings'] ?? 0;
+                    $data['delayed_castings'] = $data['delayed_castings'] ?? 0;
+                    $data['total_production_time'] = $data['total_production_time'] ?? 0;
+                    $data['average_time'] = $data['average_time'] ?? 0;
+                    $data['expected_daily_castings'] = $data['expected_daily_castings'] ?? 36;
+                    
+                    // En hızlı/yavaş döküm verilerini düzelt
+                    if (isset($data['fastest_casting']) && is_array($data['fastest_casting'])) {
+                        // Zaten doğru format
+                    } elseif (isset($data['fastest_casting']) && is_numeric($data['fastest_casting'])) {
+                        // Sadece süre var, varsayılan ocak bilgisi ekle
+                        $data['fastest_casting'] = [
+                            'furnace' => '?',
+                            'duration' => $data['fastest_casting']
+                        ];
+                    } else {
+                        $data['fastest_casting'] = null;
+                    }
+                    
+                    if (isset($data['slowest_casting']) && is_array($data['slowest_casting'])) {
+                        // Zaten doğru format
+                    } elseif (isset($data['slowest_casting']) && is_numeric($data['slowest_casting'])) {
+                        // Sadece süre var, varsayılan ocak bilgisi ekle
+                        $data['slowest_casting'] = [
+                            'furnace' => '?',
+                            'duration' => $data['slowest_casting']
+                        ];
+                    } else {
+                        $data['slowest_casting'] = null;
+                    }
+                    ?>
                     
                     <!-- Rapor Başlığı -->
                     <div class="card shadow-sm mb-4">
@@ -251,7 +297,7 @@ if (isset($_GET['report_id'])) {
                                         Hedef: <?= $data['expected_daily_castings'] ?> döküm/gün
                                     </small>
                                     
-                                    <?php if (isset($data['fastest_casting']) && $data['fastest_casting']): ?>
+                                    <?php if ($data['fastest_casting'] && is_array($data['fastest_casting'])): ?>
                                         <hr>
                                         <div class="d-flex justify-content-between">
                                             <span><i class="bi bi-lightning-charge text-success"></i> En Hızlı</span>
@@ -259,7 +305,7 @@ if (isset($_GET['report_id'])) {
                                         </div>
                                     <?php endif; ?>
                                     
-                                    <?php if (isset($data['slowest_casting']) && $data['slowest_casting']): ?>
+                                    <?php if ($data['slowest_casting'] && is_array($data['slowest_casting'])): ?>
                                         <div class="d-flex justify-content-between mt-2">
                                             <span><i class="bi bi-hourglass-split text-warning"></i> En Yavaş</span>
                                             <span>Ocak <?= $data['slowest_casting']['furnace'] ?> - <?= $data['slowest_casting']['duration'] ?> dk</span>
@@ -382,7 +428,7 @@ if (isset($_GET['report_id'])) {
                                             ?>
                                             <tr class="casting-detail-row <?= $is_delayed ? 'table-warning' : '' ?>">
                                                 <td><strong><?= $casting['furnace_number'] ?></strong></td>
-                                                <td>#<?= $casting['casting_number_per_furnace'] ?> (<?= $casting['global_casting_number'] ?>)</td>
+                                                <td>#<?= $casting['casting_number_per_furnace'] ?? $casting['casting_number'] ?? '-' ?> (<?= $casting['global_casting_number'] ?>)</td>
                                                 <td><?= date('H:i', strtotime($casting['start_time'])) ?></td>
                                                 <td><?= $casting['end_time'] ? date('H:i', strtotime($casting['end_time'])) : '-' ?></td>
                                                 <td>
@@ -400,7 +446,14 @@ if (isset($_GET['report_id'])) {
                                                 </td>
                                                 <td>
                                                     <?php
-                                                    $prova_data = $casting['prova_data'] ? json_decode($casting['prova_data'], true) : null;
+                                                    $prova_data = null;
+                                                    if (isset($casting['prova_data'])) {
+                                                        if (is_string($casting['prova_data'])) {
+                                                            $prova_data = json_decode($casting['prova_data'], true);
+                                                        } elseif (is_array($casting['prova_data'])) {
+                                                            $prova_data = $casting['prova_data'];
+                                                        }
+                                                    }
                                                     if ($prova_data && is_array($prova_data) && count($prova_data) > 0):
                                                     ?>
                                                         <span class="badge bg-info"><?= count($prova_data) ?> prova</span>

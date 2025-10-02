@@ -205,6 +205,53 @@ $furnacesBySet = get_all_furnaces_by_set();
         .prova-form-container {
             animation: slideDown 0.3s ease-out;
         }
+        
+        /* Responsive prova formu */
+        @media (max-width: 1200px) {
+            .prova-form-container .row {
+                flex-direction: column;
+                align-items: stretch !important;
+            }
+            
+            .prova-form-container .col-auto {
+                width: 100% !important;
+                margin-bottom: 10px;
+            }
+            
+            .prova-form-container .col-auto:last-child {
+                margin-bottom: 0;
+            }
+            
+            .prova-form-container input {
+                width: 100% !important;
+                max-width: 200px;
+            }
+            
+            .prova-form-container .btn {
+                width: 100%;
+                max-width: 200px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .prova-form-container {
+                padding: 10px !important;
+            }
+            
+            .prova-form-container .row {
+                gap: 8px;
+            }
+            
+            .prova-form-container input {
+                font-size: 0.9rem;
+                padding: 8px 12px;
+            }
+            
+            .prova-form-container label {
+                font-size: 0.8rem;
+                margin-bottom: 4px;
+            }
+        }
 
         @keyframes slideDown {
             from {
@@ -284,7 +331,10 @@ $furnacesBySet = get_all_furnaces_by_set();
                     <i class="bi bi-calendar-check"></i> Günü Bitir
                 </button>
                 <a href="reports.php" class="btn btn-outline-light me-3">
-                    <i class="bi bi-file-earmark-text"></i> Raporlar
+                    <i class="bi bi-file-earmark-text"></i> Günlük Raporlar
+                </a>
+                <a href="general_reports.php" class="btn btn-outline-light me-3">
+                    <i class="bi bi-graph-up"></i> Genel Raporlar
                 </a>
                 <span class="navbar-text">
                     <i class="bi bi-clock"></i>
@@ -682,11 +732,13 @@ $furnacesBySet = get_all_furnaces_by_set();
                                                 <td colspan="8" class="p-0">
                                                     <div class="prova-form-container" style="background: #f0fdf4; padding: 15px; border-left: 4px solid #16a34a;">
                                                         <div class="row align-items-end g-2">
-                                                            <div class="col-auto">
-                                                                <strong>YENİ PROVA:</strong>
+                                                            <div class="col-12 col-lg-auto">
+                                                                <strong class="d-block mb-2">YENİ PROVA:</strong>
                                                             </div>
-                                                            <div class="col-auto">
-                                                                <label class="form-label form-label-sm mb-0">C</label>
+                                                            
+                                                            <!-- Desktop: Yan yana, Mobile: Alt alta -->
+                                                            <div class="col-6 col-md-4 col-lg-auto">
+                                                                <label class="form-label form-label-sm mb-1">C</label>
                                                                 <input type="number" class="form-control form-control-sm prova-input" 
                                                                        id="prova-c-<?= $casting['id'] ?>" 
                                                                        data-casting="<?= $casting['id'] ?>"
@@ -694,8 +746,8 @@ $furnacesBySet = get_all_furnaces_by_set();
                                                                        placeholder="0.00" step="0.01" style="width: 70px;"
                                                                        onkeydown="handleProvaKeyNav(event, <?= $casting['id'] ?>, 'c')">
                                                             </div>
-                                                            <div class="col-auto">
-                                                                <label class="form-label form-label-sm mb-0">SI</label>
+                                                            <div class="col-6 col-md-4 col-lg-auto">
+                                                                <label class="form-label form-label-sm mb-1">SI</label>
                                                                 <input type="number" class="form-control form-control-sm prova-input" 
                                                                        id="prova-si-<?= $casting['id'] ?>" 
                                                                        data-casting="<?= $casting['id'] ?>"
@@ -703,8 +755,8 @@ $furnacesBySet = get_all_furnaces_by_set();
                                                                        placeholder="0.00" step="0.01" style="width: 70px;"
                                                                        onkeydown="handleProvaKeyNav(event, <?= $casting['id'] ?>, 'si')">
                                                             </div>
-                                                            <div class="col-auto">
-                                                                <label class="form-label form-label-sm mb-0">MN</label>
+                                                            <div class="col-6 col-md-4 col-lg-auto">
+                                                                <label class="form-label form-label-sm mb-1">MN</label>
                                                                 <input type="number" class="form-control form-control-sm prova-input" 
                                                                        id="prova-mn-<?= $casting['id'] ?>" 
                                                                        data-casting="<?= $casting['id'] ?>"
@@ -712,8 +764,8 @@ $furnacesBySet = get_all_furnaces_by_set();
                                                                        placeholder="0.00" step="0.01" style="width: 70px;"
                                                                        onkeydown="handleProvaKeyNav(event, <?= $casting['id'] ?>, 'mn')">
                                                             </div>
-                                                            <div class="col-auto">
-                                                                <label class="form-label form-label-sm mb-0">S</label>
+                                                            <div class="col-6 col-md-4 col-lg-auto">
+                                                                <label class="form-label form-label-sm mb-1">S</label>
                                                                 <input type="number" class="form-control form-control-sm prova-input" 
                                                                        id="prova-s-<?= $casting['id'] ?>" 
                                                                        data-casting="<?= $casting['id'] ?>"
@@ -721,8 +773,8 @@ $furnacesBySet = get_all_furnaces_by_set();
                                                                        placeholder="0.00" step="0.01" style="width: 70px;"
                                                                        onkeydown="handleProvaKeyNav(event, <?= $casting['id'] ?>, 's')">
                                                             </div>
-                                                            <div class="col-auto">
-                                                                <label class="form-label form-label-sm mb-0">P</label>
+                                                            <div class="col-6 col-md-4 col-lg-auto">
+                                                                <label class="form-label form-label-sm mb-1">P</label>
                                                                 <input type="number" class="form-control form-control-sm prova-input" 
                                                                        id="prova-p-<?= $casting['id'] ?>" 
                                                                        data-casting="<?= $casting['id'] ?>"
@@ -730,8 +782,8 @@ $furnacesBySet = get_all_furnaces_by_set();
                                                                        placeholder="0.00" step="0.01" style="width: 70px;"
                                                                        onkeydown="handleProvaKeyNav(event, <?= $casting['id'] ?>, 'p')">
                                                             </div>
-                                                            <div class="col-auto">
-                                                                <label class="form-label form-label-sm mb-0">CU</label>
+                                                            <div class="col-6 col-md-4 col-lg-auto">
+                                                                <label class="form-label form-label-sm mb-1">CU</label>
                                                                 <input type="number" class="form-control form-control-sm prova-input" 
                                                                        id="prova-cu-<?= $casting['id'] ?>" 
                                                                        data-casting="<?= $casting['id'] ?>"
@@ -739,15 +791,17 @@ $furnacesBySet = get_all_furnaces_by_set();
                                                                        placeholder="0.00" step="0.01" style="width: 70px;"
                                                                        onkeydown="handleProvaKeyNav(event, <?= $casting['id'] ?>, 'cu')">
                                                             </div>
-                                                            <div class="col-auto">
-                                                                <button class="btn btn-success btn-sm" 
-                                                                        onclick="saveInlineProva(<?= $casting['id'] ?>)">
-                                                                    <i class="bi bi-save"></i> Kaydet
-                                                                </button>
-                                                                <button class="btn btn-secondary btn-sm" 
-                                                                        onclick="toggleProvaForm(<?= $casting['id'] ?>)">
-                                                                    <i class="bi bi-x"></i> İptal
-                                                                </button>
+                                                            <div class="col-12 col-md-6 col-lg-auto">
+                                                                <div class="d-flex gap-2">
+                                                                    <button class="btn btn-success btn-sm flex-fill" 
+                                                                            onclick="saveInlineProva(<?= $casting['id'] ?>)">
+                                                                        <i class="bi bi-save"></i> Kaydet
+                                                                    </button>
+                                                                    <button class="btn btn-secondary btn-sm flex-fill" 
+                                                                            onclick="toggleProvaForm(<?= $casting['id'] ?>)">
+                                                                        <i class="bi bi-x"></i> İptal
+                                                                    </button>
+                                                                </div>
                                                             </div>
                                                         </div>
                                                         <div class="keyboard-hint mt-2">
